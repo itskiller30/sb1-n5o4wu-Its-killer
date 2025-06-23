@@ -1,5 +1,5 @@
 import React from 'react';
-import { Star, ExternalLink, ShoppingCart, TrendingUp, Award, MapPin } from 'lucide-react';
+import { Star, ExternalLink, ShoppingCart, TrendingUp, Award, MapPin, Package } from 'lucide-react';
 import { SearchResult } from '../services/productSearch';
 import { generateAffiliateLink, trackAffiliateClick } from '../utils/affiliate';
 
@@ -18,12 +18,12 @@ const SearchResults: React.FC<SearchResultsProps> = ({ results, isLoading, query
 
   if (isLoading) {
     return (
-      <div className="bg-gray-900/50 rounded-xl p-8 border border-holiday-gold/20">
+      <div className="bg-gray-800/50 rounded-xl p-8 border border-gray-700">
         <div className="flex items-center justify-center space-x-3">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-holiday-gold"></div>
-          <span className="text-holiday-silver text-lg">Searching across all marketplaces...</span>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+          <span className="text-gray-300 text-lg">Searching across all marketplaces...</span>
         </div>
-        <div className="mt-4 text-center text-holiday-silver/70">
+        <div className="mt-4 text-center text-gray-400">
           Comparing prices from Amazon, eBay, Walmart, Target, Best Buy and more...
         </div>
       </div>
@@ -32,17 +32,17 @@ const SearchResults: React.FC<SearchResultsProps> = ({ results, isLoading, query
 
   if (results.length === 0 && query) {
     return (
-      <div className="bg-gray-900/50 rounded-xl p-8 border border-holiday-gold/20 text-center">
+      <div className="bg-gray-800/50 rounded-xl p-8 border border-gray-700 text-center">
         <div className="space-y-4">
           <div className="text-6xl">🔍</div>
           <h3 className="text-xl font-semibold text-white">No results found for "{query}"</h3>
-          <p className="text-holiday-silver">Try adjusting your search terms or filters</p>
+          <p className="text-gray-400">Try adjusting your search terms or filters</p>
           <div className="flex flex-wrap justify-center gap-2 mt-4">
-            <span className="text-sm text-holiday-silver/70">Suggestions:</span>
+            <span className="text-sm text-gray-500">Suggestions:</span>
             {['wireless headphones', 'smart home', 'kitchen appliances'].map(suggestion => (
               <button
                 key={suggestion}
-                className="px-3 py-1 bg-gray-800 hover:bg-gray-700 text-holiday-silver rounded-full text-sm transition-colors"
+                className="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-full text-sm transition-colors"
               >
                 {suggestion}
               </button>
@@ -58,12 +58,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({ results, isLoading, query
   }
 
   // Group results by product similarity and find best deals
-  const groupedResults = results.reduce((groups: Record<string, SearchResult[]>, result) => {
+  const bestDeals = results.reduce((acc, result) => {
     const key = result.title.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 20);
-    if (!groups[key]) groups[key] = [];
-    groups[key].push(result);
-    return groups;
-  }, {});
+    if (!acc[key] || result.price < acc[key].price) {
+      acc[key] = result;
+    }
+    return acc;
+  }, {} as Record<string, SearchResult>);
 
   return (
     <div className="space-y-6">
@@ -71,7 +72,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ results, isLoading, query
         <h2 className="text-2xl font-bold text-white">
           Search Results for "{query}" ({results.length} found)
         </h2>
-        <div className="flex items-center gap-2 text-holiday-silver">
+        <div className="flex items-center gap-2 text-blue-400">
           <TrendingUp className="w-5 h-5" />
           <span>Best deals highlighted</span>
         </div>
@@ -79,21 +80,21 @@ const SearchResults: React.FC<SearchResultsProps> = ({ results, isLoading, query
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {results.map((result, index) => {
-          const isLowestPrice = results
-            .filter(r => r.title.toLowerCase().includes(result.title.toLowerCase().split(' ')[0]))
-            .every(r => result.price <= r.price);
+          const isBestDeal = Object.values(bestDeals).some(deal => 
+            deal.title === result.title && deal.price === result.price
+          );
 
           return (
             <div
               key={`${result.marketplace}-${index}`}
-              className={`group relative bg-gray-900/90 backdrop-blur-sm rounded-xl overflow-hidden border transition-all duration-300 hover:shadow-2xl ${
-                isLowestPrice 
-                  ? 'border-holiday-green/50 shadow-lg shadow-holiday-green/20' 
-                  : 'border-white/10 hover:border-white/20'
+              className={`group relative bg-gray-800/50 backdrop-blur-sm rounded-xl overflow-hidden border transition-all duration-300 hover:shadow-xl ${
+                isBestDeal 
+                  ? 'border-green-500/50 shadow-lg shadow-green-500/20' 
+                  : 'border-gray-700 hover:border-gray-600'
               }`}
             >
-              {isLowestPrice && (
-                <div className="absolute top-3 left-3 bg-holiday-green/95 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 z-10">
+              {isBestDeal && (
+                <div className="absolute top-3 left-3 bg-green-500 text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 z-10">
                   <Award className="w-3 h-3" />
                   Best Price
                 </div>
@@ -107,30 +108,36 @@ const SearchResults: React.FC<SearchResultsProps> = ({ results, isLoading, query
                     className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
                   />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-700 flex items-center justify-center">
-                    <ShoppingCart className="w-16 h-16 text-gray-600" />
+                  <div className="w-full h-full bg-gradient-to-br from-gray-700 to-gray-600 flex items-center justify-center">
+                    <Package className="w-16 h-16 text-gray-500" />
                   </div>
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent opacity-60"></div>
                 
-                <div className="absolute top-3 right-3 bg-black/80 backdrop-blur-sm text-holiday-silver px-2 py-1 rounded-full text-xs flex items-center gap-1">
+                <div className="absolute top-3 right-3 bg-black/80 backdrop-blur-sm text-gray-300 px-2 py-1 rounded-full text-xs flex items-center gap-1">
                   <MapPin className="w-3 h-3" />
                   {result.marketplace}
                 </div>
+
+                {result.inStock === false && (
+                  <div className="absolute bottom-3 left-3 bg-red-500 text-white px-2 py-1 rounded text-xs font-bold">
+                    Out of Stock
+                  </div>
+                )}
               </div>
 
               <div className="p-4">
-                <h3 className="text-lg font-semibold text-white line-clamp-2 group-hover:text-holiday-gold transition-colors mb-2">
+                <h3 className="text-lg font-semibold text-white line-clamp-2 group-hover:text-blue-400 transition-colors mb-2">
                   {result.title}
                 </h3>
 
                 <div className="flex items-center justify-between mb-3">
                   <div className="space-y-1">
-                    <div className="text-2xl font-bold text-holiday-gold">
+                    <div className={`text-2xl font-bold ${isBestDeal ? 'text-green-400' : 'text-blue-400'}`}>
                       ${result.price.toLocaleString()}
                     </div>
-                    {isLowestPrice && (
-                      <div className="text-xs text-holiday-green flex items-center gap-1">
+                    {isBestDeal && (
+                      <div className="text-xs text-green-400 flex items-center gap-1">
                         <TrendingUp className="w-3 h-3" />
                         Lowest price found
                       </div>
@@ -138,11 +145,11 @@ const SearchResults: React.FC<SearchResultsProps> = ({ results, isLoading, query
                   </div>
                   
                   {result.rating && (
-                    <div className="flex items-center gap-1 text-holiday-silver">
-                      <Star className="w-4 h-4 fill-holiday-gold text-holiday-gold" />
+                    <div className="flex items-center gap-1 text-gray-400">
+                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                       <span className="text-sm font-medium">{result.rating.toFixed(1)}</span>
                       {result.reviews && (
-                        <span className="text-xs text-holiday-silver/70">
+                        <span className="text-xs text-gray-500">
                           ({result.reviews.toLocaleString()})
                         </span>
                       )}
@@ -150,34 +157,54 @@ const SearchResults: React.FC<SearchResultsProps> = ({ results, isLoading, query
                   )}
                 </div>
 
+                {result.shippingInfo && (
+                  <div className="text-xs text-gray-400 mb-3 bg-gray-700/30 rounded px-2 py-1">
+                    📦 {result.shippingInfo}
+                  </div>
+                )}
+
                 <div className="flex gap-2">
                   <button
                     onClick={() => handlePurchaseClick(result)}
+                    disabled={result.inStock === false}
                     className={`flex-1 py-2.5 px-4 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
-                      isLowestPrice
-                        ? 'bg-gradient-to-r from-holiday-green via-holiday-green/90 to-holiday-green/80 hover:from-holiday-green/90 hover:to-holiday-green text-white'
-                        : 'bg-gradient-to-r from-holiday-gold via-holiday-gold/90 to-holiday-gold/80 hover:from-holiday-gold/90 hover:to-holiday-gold text-gray-900'
+                      result.inStock === false
+                        ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                        : isBestDeal
+                        ? 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white'
+                        : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white'
                     }`}
                   >
                     <ShoppingCart className="w-4 h-4" />
-                    Buy Now
+                    {result.inStock === false ? 'Out of Stock' : 'Buy Now'}
                   </button>
                   
                   <button
                     onClick={() => window.open(result.url, '_blank')}
-                    className="px-3 py-2.5 bg-gray-800/50 hover:bg-gray-700/50 text-holiday-silver hover:text-white rounded-lg transition-all duration-300 flex items-center justify-center"
+                    className="px-3 py-2.5 bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white rounded-lg transition-all duration-300 flex items-center justify-center"
                   >
                     <ExternalLink className="w-4 h-4" />
                   </button>
                 </div>
 
-                <p className="text-xs text-holiday-silver/60 text-center mt-2">
+                <p className="text-xs text-gray-500 text-center mt-2">
                   Affiliate link • No extra cost to you
                 </p>
               </div>
             </div>
           );
         })}
+      </div>
+
+      {/* Search Tips */}
+      <div className="bg-gray-800/30 rounded-xl p-4 border border-gray-700/50">
+        <h4 className="text-sm font-semibold text-gray-300 mb-2">💡 Search Tips:</h4>
+        <div className="text-xs text-gray-400 space-y-1">
+          <p>• Use specific product names for better results (e.g., "iPhone 15 Pro" vs "phone")</p>
+          <p>• Try different keywords if you don't find what you're looking for</p>
+          <p>• Use filters to narrow down results by price, rating, or marketplace</p>
+          <p>• Green badges indicate the best price we found across all stores</p>
+        </div>
       </div>
     </div>
   );

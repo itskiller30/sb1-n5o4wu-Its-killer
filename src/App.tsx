@@ -25,16 +25,23 @@ function AppContent() {
   const [isSearching, setIsSearching] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSubmission, setShowSubmission] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
 
   const handleSearchResults = (results: SearchResult[]) => {
     setSearchResults(results);
     setIsSearching(false);
+    setHasSearched(true);
   };
 
   const handleFiltersChange = (filters: any) => {
     setSearchQuery(filters.query);
     if (filters.query && filters.query.length > 2) {
       setIsSearching(true);
+    } else if (!filters.query) {
+      // Clear search when query is empty
+      setSearchResults([]);
+      setHasSearched(false);
+      setIsSearching(false);
     }
   };
 
@@ -65,7 +72,8 @@ function AppContent() {
             onFiltersChange={handleFiltersChange}
           />
 
-          {searchResults.length > 0 ? (
+          {/* Show search results if we have them, otherwise show community picks */}
+          {hasSearched ? (
             <SearchResults 
               results={searchResults}
               isLoading={isSearching}

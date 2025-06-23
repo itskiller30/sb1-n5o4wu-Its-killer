@@ -2,9 +2,11 @@ import React, { useState, useRef } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Header from './components/Header';
+import SustainabilityMission from './components/SustainabilityMission';
 import ProductSearch from './components/ProductSearch';
 import SearchResults from './components/SearchResults';
 import CommunityRecommendations from './components/CommunityRecommendations';
+import CommunityHighlight from './components/CommunityHighlight';
 import SubmissionForm from './components/SubmissionForm';
 import AffiliateDisclosure from './components/AffiliateDisclosure';
 import RevenueOptimizer from './components/RevenueOptimizer';
@@ -76,6 +78,11 @@ function AppContent() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <Header />
         
+        {/* Sustainability Mission Section */}
+        <div className="mt-12">
+          <SustainabilityMission />
+        </div>
+        
         <div className="mt-12 space-y-8">
           {/* Main Search Interface */}
           <ProductSearch 
@@ -119,34 +126,39 @@ function AppContent() {
               query={searchQuery}
             />
           ) : (
-            <CommunityRecommendations 
-              products={mockProducts}
-              isLoading={false}
-            />
+            <>
+              <CommunityHighlight onShare={() => setShowSubmission(true)} />
+              <CommunityRecommendations 
+                products={mockProducts}
+                isLoading={false}
+              />
+            </>
           )}
 
-          {/* Call to Action */}
-          <div className="text-center">
-            <div className="bg-gradient-to-br from-holiday-pine to-gray-900 rounded-2xl p-8 border border-holiday-gold/20">
-              <h3 className="text-2xl font-bold text-holiday-snow mb-4">
-                Found an Amazing Product?
-              </h3>
-              <p className="text-holiday-silver mb-6 max-w-2xl mx-auto">
-                Share your killer finds with our community! Help others discover products 
-                that exceed expectations and earn recognition for your great taste.
-              </p>
-              <button
-                onClick={() => setShowSubmission(true)}
-                className="group relative transform hover:scale-105 transition-all duration-300"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-holiday-red via-holiday-gold to-holiday-green rounded-xl blur opacity-50 group-hover:opacity-75 transition-opacity"></div>
-                <div className="relative bg-black/90 backdrop-blur-sm hover:bg-black/80 text-white px-8 py-4 rounded-xl border border-white/10 flex items-center gap-3">
-                  <span className="text-lg font-semibold">Share Your Discovery</span>
-                  <span className="text-holiday-gold">→</span>
-                </div>
-              </button>
+          {/* Call to Action - Only show in search view */}
+          {activeView === 'search' && (
+            <div className="text-center">
+              <div className="bg-gradient-to-br from-holiday-pine to-gray-900 rounded-2xl p-8 border border-holiday-gold/20">
+                <h3 className="text-2xl font-bold text-holiday-snow mb-4">
+                  Found an Amazing Product?
+                </h3>
+                <p className="text-holiday-silver mb-6 max-w-2xl mx-auto">
+                  Share your killer finds with our community! Help others discover products 
+                  that exceed expectations and join our mission to reduce wasteful returns.
+                </p>
+                <button
+                  onClick={() => setShowSubmission(true)}
+                  className="group relative transform hover:scale-105 transition-all duration-300"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-holiday-red via-holiday-gold to-holiday-green rounded-xl blur opacity-50 group-hover:opacity-75 transition-opacity"></div>
+                  <div className="relative bg-black/90 backdrop-blur-sm hover:bg-black/80 text-white px-8 py-4 rounded-xl border border-white/10 flex items-center gap-3">
+                    <span className="text-lg font-semibold">Share Your Discovery</span>
+                    <span className="text-holiday-gold">→</span>
+                  </div>
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {showSubmission && (

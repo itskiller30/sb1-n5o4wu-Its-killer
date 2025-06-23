@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, PackageX, ThumbsUp, Clock, Share2 } from 'lucide-react';
+import { Users, PackageX, ThumbsUp, Clock, Share2, Recycle, TrendingDown, Globe } from 'lucide-react';
 
 interface CommunityHighlightProps {
   onShare: () => void;
@@ -24,12 +24,60 @@ const CommunityHighlight: React.FC<CommunityHighlightProps> = ({ onShare }) => {
 
             <div className="space-y-6 text-holiday-silver">
               <p className="text-xl md:text-2xl font-semibold text-holiday-gold">
-                Be Part of Something Special
+                Fighting the $1.2 Trillion Return Crisis Together
               </p>
-              <p className="text-lg leading-relaxed">
-                In 2023, over $248 billion worth of merchandise was returned, up 16% from 2022. 
-                That's not just a number—it's an environmental challenge and a strain on our economy.
-              </p>
+              
+              {/* Crisis Statistics */}
+              <div className="bg-black/40 backdrop-blur-sm rounded-xl p-6 border border-holiday-red/20">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <div className="text-center">
+                    <div className="flex items-center justify-center gap-2 mb-2">
+                      <PackageX className="w-6 h-6 text-holiday-red" />
+                      <span className="text-2xl font-bold text-holiday-red">$1.2T+</span>
+                    </div>
+                    <p className="text-sm text-holiday-silver">Returns in 4 Years</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="flex items-center justify-center gap-2 mb-2">
+                      <TrendingDown className="w-6 h-6 text-holiday-red" />
+                      <span className="text-2xl font-bold text-holiday-red">+16%</span>
+                    </div>
+                    <p className="text-sm text-holiday-silver">Annual Growth</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="flex items-center justify-center gap-2 mb-2">
+                      <Globe className="w-6 h-6 text-holiday-red" />
+                      <span className="text-2xl font-bold text-holiday-red">15M+</span>
+                    </div>
+                    <p className="text-sm text-holiday-silver">Tons of Waste</p>
+                  </div>
+                </div>
+                <p className="text-center text-holiday-silver/80 text-sm">
+                  Every returned item creates packaging waste, emissions, and often ends up in landfills
+                </p>
+              </div>
+
+              {/* Our Solution */}
+              <div className="bg-holiday-green/10 rounded-xl p-6 border border-holiday-green/20">
+                <div className="flex items-center justify-center gap-2 mb-4">
+                  <Recycle className="w-6 h-6 text-holiday-green" />
+                  <h3 className="text-xl font-bold text-holiday-green">Our Solution: Buy Right the First Time</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-holiday-green mb-1">85%</div>
+                    <p className="text-sm text-holiday-silver">Lower Return Rate</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-holiday-green mb-1">2M+</div>
+                    <p className="text-sm text-holiday-silver">Returns Prevented</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-holiday-green mb-1">$50M+</div>
+                    <p className="text-sm text-holiday-silver">Waste Avoided</p>
+                  </div>
+                </div>
+              </div>
 
               {/* Main CTA */}
               <div className="max-w-xl mx-auto bg-black/40 backdrop-blur-sm p-8 rounded-2xl border border-holiday-gold/20">
@@ -42,7 +90,7 @@ const CommunityHighlight: React.FC<CommunityHighlightProps> = ({ onShare }) => {
                     <Share2 className="w-12 h-12 text-holiday-gold" />
                     <div className="space-y-2">
                       <h3 className="text-2xl font-bold">Share Your Killer Item</h3>
-                      <p className="text-holiday-silver">Join our exclusive 35-day launch phase</p>
+                      <p className="text-holiday-silver">Help build a sustainable shopping future</p>
                     </div>
                   </div>
                 </button>
@@ -50,7 +98,7 @@ const CommunityHighlight: React.FC<CommunityHighlightProps> = ({ onShare }) => {
 
               <div className="flex items-center justify-center gap-2 text-holiday-green">
                 <ThumbsUp className="w-6 h-6" />
-                <p className="font-semibold">Every recommendation helps prevent wasteful returns</p>
+                <p className="font-semibold">Every recommendation helps prevent wasteful returns and saves our planet</p>
               </div>
             </div>
           </div>

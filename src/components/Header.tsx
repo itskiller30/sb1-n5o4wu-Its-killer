@@ -1,5 +1,5 @@
 import React from 'react';
-import { Zap, Sparkles, Star, Award } from 'lucide-react';
+import { Zap, Sparkles, Star, Award, Leaf, TrendingDown } from 'lucide-react';
 
 const Header: React.FC = () => {
   return (
@@ -50,12 +50,24 @@ const Header: React.FC = () => {
             </div>
           </div>
 
-          {/* Value Proposition */}
+          {/* Mission Statement */}
           <div className="bg-black/40 backdrop-blur-sm p-6 rounded-xl border border-holiday-gold/20 max-w-4xl">
-            <p className="text-xl text-holiday-silver leading-relaxed">
+            <p className="text-xl text-holiday-silver leading-relaxed mb-4">
               Discover products that exceed expectations. Every item is rated 11+ out of 10 by real users 
               and verified by our community of discerning shoppers across Amazon, eBay, and premium retailers.
             </p>
+            
+            {/* Sustainability Badge */}
+            <div className="flex items-center justify-center gap-6 pt-4 border-t border-holiday-green/20">
+              <div className="flex items-center gap-2 text-holiday-green">
+                <Leaf className="w-5 h-5" />
+                <span className="font-semibold">Fighting $1.2T+ Return Crisis</span>
+              </div>
+              <div className="flex items-center gap-2 text-holiday-green">
+                <TrendingDown className="w-5 h-5" />
+                <span className="font-semibold">85% Lower Return Rate</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

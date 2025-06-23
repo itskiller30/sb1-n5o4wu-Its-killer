@@ -1,73 +1,52 @@
 import React from 'react';
-import { Zap, Sparkles, Star, Award, Leaf, TrendingDown } from 'lucide-react';
+import { Zap, Star, Award, TrendingDown } from 'lucide-react';
 
 const Header: React.FC = () => {
   return (
-    <header className="relative">
-      {/* Gradient Orbs */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -left-40 w-80 h-80 bg-holiday-red/20 rounded-full blur-3xl"></div>
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-holiday-gold/20 rounded-full blur-3xl"></div>
-        <div className="absolute top-40 left-1/2 -translate-x-1/2 w-80 h-80 bg-holiday-green/20 rounded-full blur-3xl"></div>
+    <header className="text-center space-y-8">
+      {/* Logo */}
+      <div className="flex items-center justify-center gap-4">
+        <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-4 rounded-2xl">
+          <Zap className="w-12 h-12 text-white" />
+        </div>
+        <h1 className="text-6xl font-bold bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+          itsKiller
+        </h1>
       </div>
 
-      {/* Content */}
-      <div className="relative">
-        <div className="flex flex-col items-center gap-8 text-center">
-          {/* Logo Area */}
-          <div className="relative group">
-            <div className="absolute inset-0 bg-gradient-to-r from-holiday-red via-holiday-gold to-holiday-green blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-            <div className="relative bg-black/40 backdrop-blur-sm p-6 rounded-2xl border border-white/10">
-              <Zap className="w-20 h-20 text-holiday-gold animate-twinkle" />
-            </div>
+      {/* Tagline */}
+      <div className="space-y-4">
+        <p className="text-2xl text-gray-300 font-light">
+          Only the Best of the Best
+        </p>
+        
+        <div className="flex items-center justify-center gap-8 text-blue-400">
+          <div className="flex items-center gap-2">
+            <Star className="w-5 h-5 fill-blue-400" />
+            <span className="font-semibold">11+ Rating Required</span>
           </div>
-
-          {/* Title Area */}
-          <div className="space-y-6">
-            <h1 className="relative">
-              <span className="text-8xl font-bold bg-gradient-to-r from-holiday-red via-holiday-gold to-holiday-green bg-clip-text text-transparent
-                             drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)] filter">
-                itsKiller
-              </span>
-              <Sparkles className="absolute -right-16 top-0 w-10 h-10 text-holiday-gold animate-pulse" />
-            </h1>
-            
-            <div className="space-y-4">
-              <p className="text-3xl text-holiday-silver font-light italic font-serif">
-                Only the Best of the Best
-              </p>
-              
-              <div className="flex items-center justify-center gap-8 text-holiday-gold">
-                <div className="flex items-center gap-2">
-                  <Star className="w-6 h-6 fill-holiday-gold" />
-                  <span className="text-lg font-semibold">11+ Rating Required</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Award className="w-6 h-6" />
-                  <span className="text-lg font-semibold">Community Verified</span>
-                </div>
-              </div>
-            </div>
+          <div className="flex items-center gap-2">
+            <Award className="w-5 h-5" />
+            <span className="font-semibold">Community Verified</span>
           </div>
+        </div>
+      </div>
 
-          {/* Mission Statement */}
-          <div className="bg-black/40 backdrop-blur-sm p-6 rounded-xl border border-holiday-gold/20 max-w-4xl">
-            <p className="text-xl text-holiday-silver leading-relaxed mb-4">
-              Discover products that exceed expectations. Every item is rated 11+ out of 10 by real users 
-              and verified by our community of discerning shoppers across Amazon, eBay, and premium retailers.
-            </p>
-            
-            {/* Sustainability Badge */}
-            <div className="flex items-center justify-center gap-6 pt-4 border-t border-holiday-green/20">
-              <div className="flex items-center gap-2 text-holiday-green">
-                <Leaf className="w-5 h-5" />
-                <span className="font-semibold">Fighting $1.2T+ Return Crisis</span>
-              </div>
-              <div className="flex items-center gap-2 text-holiday-green">
-                <TrendingDown className="w-5 h-5" />
-                <span className="font-semibold">85% Lower Return Rate</span>
-              </div>
-            </div>
+      {/* Mission */}
+      <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 max-w-4xl mx-auto border border-gray-700">
+        <p className="text-lg text-gray-300 leading-relaxed mb-4">
+          Discover products that exceed expectations. Every item is rated 11+ out of 10 by real users 
+          and verified by our community of discerning shoppers.
+        </p>
+        
+        <div className="flex items-center justify-center gap-6 pt-4 border-t border-gray-700">
+          <div className="flex items-center gap-2 text-green-400">
+            <TrendingDown className="w-5 h-5" />
+            <span className="font-semibold">Fighting $1.2T+ Return Crisis</span>
+          </div>
+          <div className="text-gray-400">•</div>
+          <div className="flex items-center gap-2 text-green-400">
+            <span className="font-semibold">85% Lower Return Rate</span>
           </div>
         </div>
       </div>

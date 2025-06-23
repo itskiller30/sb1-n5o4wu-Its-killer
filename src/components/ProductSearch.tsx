@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, Loader2, TrendingUp, X } from 'lucide-react';
 import { searchProducts, SearchResult } from '../services/productSearch';
+import toast from 'react-hot-toast';
 
 interface ProductSearchProps {
   onResults: (results: SearchResult[]) => void;
@@ -31,9 +32,9 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
   const [suggestions, setSuggestions] = useState<string[]>([]);
 
   const popularSearches = [
-    'wireless headphones', 'smart home devices', 'kitchen appliances',
-    'fitness equipment', 'outdoor gear', 'office chairs', 'coffee makers',
-    'phone accessories', 'gaming peripherals', 'travel bags'
+    'wireless headphones', 'laptop computer', 'smartphone', 'coffee maker',
+    'kitchen appliances', 'fitness equipment', 'office chair', 'gaming mouse',
+    'bluetooth speaker', 'tablet', 'smartwatch', 'air fryer'
   ];
 
   const categories = [
@@ -52,18 +53,28 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
   }, [filters, onFiltersChange]);
 
   const handleSearch = async () => {
-    if (!filters.query.trim()) return;
+    if (!filters.query.trim()) {
+      toast.error('Please enter a search term');
+      return;
+    }
+    
+    if (filters.query.length < 2) {
+      toast.error('Please enter at least 2 characters');
+      return;
+    }
     
     setIsSearching(true);
     try {
+      console.log('Searching for:', filters.query);
       const results = await searchProducts(filters.query);
+      console.log('Search results:', results);
       
       // Apply filters to results
       let filteredResults = results.filter(result => {
         const matchesCategory = !filters.category || filters.category === 'All Categories' || 
-          result.title.toLowerCase().includes(filters.category.toLowerCase());
+          result.category?.toLowerCase().includes(filters.category.toLowerCase());
         const matchesPrice = result.price >= filters.priceRange[0] && result.price <= filters.priceRange[1];
-        const matchesRating = !result.rating || result.rating >= filters.rating;
+        const matchesRating = !filters.rating || !result.rating || result.rating >= filters.rating;
         const matchesMarketplace = !filters.marketplace || filters.marketplace === 'All Stores' || 
           result.marketplace === filters.marketplace;
         
@@ -88,8 +99,15 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
 
       onResults(filteredResults);
       setSuggestions([]);
+      
+      if (filteredResults.length > 0) {
+        toast.success(`Found ${filteredResults.length} products!`);
+      } else {
+        toast.error('No products found. Try different search terms.');
+      }
     } catch (error) {
       console.error('Search failed:', error);
+      toast.error('Search failed. Please try again.');
     } finally {
       setIsSearching(false);
     }
@@ -99,7 +117,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
     setFilters(prev => ({ ...prev, query: value }));
     
     // Generate suggestions
-    if (value.length > 2) {
+    if (value.length > 1) {
       const matchingSuggestions = popularSearches.filter(search =>
         search.toLowerCase().includes(value.toLowerCase())
       );
@@ -109,13 +127,24 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
     }
   };
 
-  const selectSuggestion = (suggestion: string) => {
+  const selectSuggestion = async (suggestion: string) => {
     setFilters(prev => ({ ...prev, query: suggestion }));
     setSuggestions([]);
+    
     // Auto-search when suggestion is selected
-    setTimeout(() => {
-      handleSearch();
-    }, 100);
+    setIsSearching(true);
+    try {
+      const results = await searchProducts(suggestion);
+      onResults(results);
+      if (results.length > 0) {
+        toast.success(`Found ${results.length} products!`);
+      }
+    } catch (error) {
+      console.error('Auto-search failed:', error);
+      toast.error('Search failed. Please try again.');
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   const clearSearch = () => {
@@ -145,6 +174,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
                 <button
                   onClick={clearSearch}
                   className="p-2 text-gray-400 hover:text-white transition-colors"
+                  title="Clear search"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -291,7 +321,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
         <div>
           <p className="text-gray-400 text-sm mb-3">Popular Searches:</p>
           <div className="flex flex-wrap gap-2">
-            {popularSearches.slice(0, 6).map((search, index) => (
+            {popularSearches.slice(0, 8).map((search, index) => (
               <button
                 key={index}
                 onClick={() => selectSuggestion(search)}

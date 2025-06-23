@@ -3,10 +3,13 @@ import { Toaster } from 'react-hot-toast';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Header from './components/Header';
 import SustainabilityMission from './components/SustainabilityMission';
+import NavigationTabs from './components/NavigationTabs';
+import StatsBar from './components/StatsBar';
 import ProductSearch from './components/ProductSearch';
 import SearchResults from './components/SearchResults';
 import CommunityRecommendations from './components/CommunityRecommendations';
 import CommunityHighlight from './components/CommunityHighlight';
+import FloatingActionButton from './components/FloatingActionButton';
 import SubmissionForm from './components/SubmissionForm';
 import AffiliateDisclosure from './components/AffiliateDisclosure';
 import RevenueOptimizer from './components/RevenueOptimizer';
@@ -28,7 +31,7 @@ function AppContent() {
   const [isSearching, setIsSearching] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSubmission, setShowSubmission] = useState(false);
-  const [activeView, setActiveView] = useState<'search' | 'community'>('search');
+  const [activeView, setActiveView] = useState<'search' | 'community'>('community');
 
   const handleSearchResults = (results: SearchResult[]) => {
     setSearchResults(results);
@@ -50,6 +53,14 @@ function AppContent() {
     setShowSubmission(false);
   };
 
+  // Calculate stats
+  const stats = {
+    totalProducts: mockProducts.length,
+    totalUsers: 52000,
+    wasteReduced: '$50M+',
+    avgRating: mockProducts.reduce((sum, p) => sum + p.rating, 0) / mockProducts.length
+  };
+
   // Enable admin mode for demo
   React.useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -63,7 +74,14 @@ function AppContent() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-black relative overflow-hidden">
+      {/* Background Effects */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute -top-40 -left-40 w-80 h-80 bg-holiday-red/10 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-holiday-gold/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-holiday-green/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '4s' }}></div>
+      </div>
+
       <Toaster 
         position="top-center"
         toastOptions={{
@@ -75,90 +93,61 @@ function AppContent() {
         }}
       />
       
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 py-8">
         <Header />
         
-        {/* Sustainability Mission Section */}
-        <div className="mt-12">
-          <SustainabilityMission />
+        {/* Stats Bar */}
+        <div className="mt-8">
+          <StatsBar 
+            totalProducts={stats.totalProducts}
+            totalUsers={stats.totalUsers}
+            wasteReduced={stats.wasteReduced}
+            avgRating={stats.avgRating}
+          />
         </div>
         
-        <div className="mt-12 space-y-8">
+        {/* Sustainability Mission Section - Only show on community view */}
+        {activeView === 'community' && (
+          <div className="mt-8">
+            <SustainabilityMission />
+          </div>
+        )}
+        
+        <div className="mt-8 space-y-8">
           {/* Main Search Interface */}
           <ProductSearch 
             onResults={handleSearchResults}
             onFiltersChange={handleFiltersChange}
           />
 
-          {/* View Toggle */}
-          <div className="flex justify-center">
-            <div className="bg-gray-900/50 rounded-xl p-2 border border-gray-700/50">
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setActiveView('search')}
-                  className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${
-                    activeView === 'search'
-                      ? 'bg-holiday-gold text-gray-900'
-                      : 'text-holiday-silver hover:text-white hover:bg-gray-800/50'
-                  }`}
-                >
-                  🔍 Search Results {searchResults.length > 0 && `(${searchResults.length})`}
-                </button>
-                <button
-                  onClick={() => setActiveView('community')}
-                  className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${
-                    activeView === 'community'
-                      ? 'bg-holiday-gold text-gray-900'
-                      : 'text-holiday-silver hover:text-white hover:bg-gray-800/50'
-                  }`}
-                >
-                  🤝 Community Picks ({mockProducts.length})
-                </button>
+          {/* Enhanced Navigation Tabs */}
+          <NavigationTabs
+            activeView={activeView}
+            onViewChange={setActiveView}
+            searchResultsCount={searchResults.length}
+            communityCount={mockProducts.length}
+          />
+
+          {/* Content Area with smooth transitions */}
+          <div className="relative min-h-[600px]">
+            {activeView === 'search' ? (
+              <div className="animate-fade-in">
+                <SearchResults 
+                  results={searchResults}
+                  isLoading={isSearching}
+                  query={searchQuery}
+                />
               </div>
-            </div>
+            ) : (
+              <div className="animate-fade-in space-y-8">
+                <CommunityHighlight onShare={() => setShowSubmission(true)} />
+                <CommunityRecommendations 
+                  products={mockProducts}
+                  isLoading={false}
+                />
+              </div>
+            )}
           </div>
-
-          {/* Content Area */}
-          {activeView === 'search' ? (
-            <SearchResults 
-              results={searchResults}
-              isLoading={isSearching}
-              query={searchQuery}
-            />
-          ) : (
-            <>
-              <CommunityHighlight onShare={() => setShowSubmission(true)} />
-              <CommunityRecommendations 
-                products={mockProducts}
-                isLoading={false}
-              />
-            </>
-          )}
-
-          {/* Call to Action - Only show in search view */}
-          {activeView === 'search' && (
-            <div className="text-center">
-              <div className="bg-gradient-to-br from-holiday-pine to-gray-900 rounded-2xl p-8 border border-holiday-gold/20">
-                <h3 className="text-2xl font-bold text-holiday-snow mb-4">
-                  Found an Amazing Product?
-                </h3>
-                <p className="text-holiday-silver mb-6 max-w-2xl mx-auto">
-                  Share your killer finds with our community! Help others discover products 
-                  that exceed expectations and join our mission to reduce wasteful returns.
-                </p>
-                <button
-                  onClick={() => setShowSubmission(true)}
-                  className="group relative transform hover:scale-105 transition-all duration-300"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-holiday-red via-holiday-gold to-holiday-green rounded-xl blur opacity-50 group-hover:opacity-75 transition-opacity"></div>
-                  <div className="relative bg-black/90 backdrop-blur-sm hover:bg-black/80 text-white px-8 py-4 rounded-xl border border-white/10 flex items-center gap-3">
-                    <span className="text-lg font-semibold">Share Your Discovery</span>
-                    <span className="text-holiday-gold">→</span>
-                  </div>
-                </button>
-              </div>
-            </div>
-          )}
         </div>
 
         {showSubmission && (
@@ -168,6 +157,9 @@ function AppContent() {
           />
         )}
       </div>
+
+      {/* Floating Action Button */}
+      <FloatingActionButton onShare={() => setShowSubmission(true)} />
 
       {/* Affiliate Disclosure */}
       <AffiliateDisclosure />

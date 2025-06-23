@@ -9,6 +9,8 @@ import FilterBar from './components/FilterBar';
 import ProductGrid from './components/ProductGrid';
 import SubmissionForm from './components/SubmissionForm';
 import CommunityStats from './components/CommunityStats';
+import AffiliateDisclosure from './components/AffiliateDisclosure';
+import RevenueOptimizer from './components/RevenueOptimizer';
 import useInfiniteProducts from './hooks/useInfiniteProducts';
 import { Product, SortOption } from './types';
 
@@ -92,6 +94,18 @@ function AppContent() {
     }
   };
 
+  // Enable admin mode for demo (remove in production)
+  React.useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+        localStorage.setItem('admin_mode', 'true');
+        window.location.reload();
+      }
+    };
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, []);
+
   return (
     <div className="min-h-screen bg-black">
       <Toaster 
@@ -157,6 +171,12 @@ function AppContent() {
           />
         )}
       </div>
+
+      {/* Affiliate Disclosure */}
+      <AffiliateDisclosure />
+      
+      {/* Revenue Analytics (Admin Only) */}
+      <RevenueOptimizer />
     </div>
   );
 }

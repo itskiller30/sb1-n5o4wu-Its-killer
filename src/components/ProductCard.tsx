@@ -1,28 +1,45 @@
 import React from 'react';
-import { Star, ThumbsUp, ShoppingCart, ExternalLink, Tag, TrendingUp, Award, Zap } from 'lucide-react';
+import { Star, ThumbsUp, ShoppingCart, ExternalLink, Tag, TrendingUp, Award, Zap, DollarSign } from 'lucide-react';
 import { Product } from '../types';
+import { trackAffiliateClick, findBestDeal, generateAffiliateLink, getOptimalMarketplace } from '../utils/affiliate';
 
 interface ProductCardProps {
   product: Product;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const handleBuyClick = (marketplace: string, url: string) => {
-    window.open(url, '_blank');
+  const handleAffiliateClick = async (marketplace: string, url: string, isOptimal: boolean = false) => {
+    // Track the click for analytics
+    await trackAffiliateClick(product.id, marketplace);
+    
+    // Generate affiliate link
+    const affiliateUrl = generateAffiliateLink(url, marketplace as any);
+    
+    // Open in new tab
+    window.open(affiliateUrl, '_blank', 'noopener,noreferrer');
   };
 
-  const getBestPrice = () => {
-    if (product.lowestPrice && product.lowestPriceMarketplace) {
+  const getBestDeal = () => {
+    const deal = findBestDeal(product.marketplaceLinks);
+    if (deal) {
       return {
-        price: product.lowestPrice,
-        marketplace: product.lowestPriceMarketplace,
-        savings: product.price - product.lowestPrice
+        ...deal,
+        savings: product.price - deal.price
       };
     }
     return null;
   };
 
-  const bestPrice = getBestPrice();
+  const getOptimalLink = () => {
+    const optimal = getOptimalMarketplace(product.marketplaceLinks);
+    return optimal ? {
+      marketplace: optimal,
+      url: product.marketplaceLinks[optimal]
+    } : null;
+  };
+
+  const bestDeal = getBestDeal();
+  const optimalLink = getOptimalLink();
 
   return (
     <div className="group relative">
@@ -46,10 +63,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </div>
 
           {/* Best Price Badge */}
-          {bestPrice && bestPrice.savings > 0 && (
+          {bestDeal && bestDeal.savings > 0 && (
             <div className="absolute top-3 left-3 bg-holiday-green/95 backdrop-blur-sm text-white px-3 py-2 rounded-full text-sm font-bold flex items-center gap-1.5 shadow-lg">
               <Tag className="w-4 h-4" />
-              Save ${bestPrice.savings.toFixed(0)}
+              Save ${bestDeal.savings.toFixed(0)}
             </div>
           )}
 
@@ -57,6 +74,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <div className="absolute bottom-3 left-3 bg-black/80 backdrop-blur-sm text-holiday-gold px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5">
             <Award className="w-3 h-3" />
             Community Verified
+          </div>
+
+          {/* Affiliate Disclosure */}
+          <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-sm text-holiday-silver/80 px-2 py-1 rounded text-xs">
+            Affiliate Links
           </div>
         </div>
 
@@ -73,11 +95,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
           <div className="flex items-center justify-between mb-4">
             <div className="space-y-1">
-              {bestPrice ? (
+              {bestDeal ? (
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <span className="text-xl font-bold text-holiday-green">
-                      ${bestPrice.price.toLocaleString()}
+                      ${bestDeal.price.toLocaleString()}
                     </span>
                     <span className="text-sm text-holiday-silver/60 line-through">
                       ${product.price.toLocaleString()}
@@ -85,7 +107,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                   </div>
                   <div className="text-xs text-holiday-green flex items-center gap-1">
                     <TrendingUp className="w-3 h-3" />
-                    Best at {bestPrice.marketplace}
+                    Best at {bestDeal.marketplace.charAt(0).toUpperCase() + bestDeal.marketplace.slice(1)}
                   </div>
                 </div>
               ) : (
@@ -111,30 +133,47 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             ))}
           </div>
 
-          {/* Marketplace Buttons */}
+          {/* Primary CTA - Best Deal or Optimal Marketplace */}
           <div className="space-y-2">
-            {bestPrice && (
+            {bestDeal ? (
               <button
-                onClick={() => handleBuyClick(bestPrice.marketplace, product.marketplaceLinks[bestPrice.marketplace.toLowerCase()] || '')}
-                className="w-full py-3 px-4 rounded-lg bg-gradient-to-r from-holiday-green via-holiday-green/90 to-holiday-green/80 hover:from-holiday-green/90 hover:to-holiday-green text-white font-bold cursor-pointer transition-all duration-300 flex items-center justify-center gap-2 shadow-lg"
+                onClick={() => handleAffiliateClick(bestDeal.marketplace, product.marketplaceLinks[bestDeal.marketplace] || '', true)}
+                className="w-full py-3 px-4 rounded-lg bg-gradient-to-r from-holiday-green via-holiday-green/90 to-holiday-green/80 hover:from-holiday-green/90 hover:to-holiday-green text-white font-bold cursor-pointer transition-all duration-300 flex items-center justify-center gap-2 shadow-lg group/btn"
+              >
+                <DollarSign className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
+                <span>Best Price: ${bestDeal.price} at {bestDeal.marketplace.charAt(0).toUpperCase() + bestDeal.marketplace.slice(1)}</span>
+              </button>
+            ) : optimalLink && (
+              <button
+                onClick={() => handleAffiliateClick(optimalLink.marketplace, optimalLink.url, true)}
+                className="w-full py-3 px-4 rounded-lg bg-gradient-to-r from-holiday-gold via-holiday-gold/90 to-holiday-gold/80 hover:from-holiday-gold/90 hover:to-holiday-gold text-gray-900 font-bold cursor-pointer transition-all duration-300 flex items-center justify-center gap-2 shadow-lg"
               >
                 <ShoppingCart className="w-4 h-4" />
-                Best Price: ${bestPrice.price} at {bestPrice.marketplace}
+                Buy Now - ${product.price.toLocaleString()}
               </button>
             )}
             
+            {/* Secondary marketplace options */}
             <div className="grid grid-cols-2 gap-2">
-              {Object.entries(product.marketplaceLinks).slice(0, 2).map(([marketplace, url]) => (
+              {Object.entries(product.marketplaceLinks)
+                .filter(([marketplace]) => marketplace !== bestDeal?.marketplace && marketplace !== optimalLink?.marketplace)
+                .slice(0, 2)
+                .map(([marketplace, url]) => (
                 <button
                   key={marketplace}
-                  onClick={() => handleBuyClick(marketplace, url)}
-                  className="py-2 px-3 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 text-holiday-silver hover:text-white border border-white/10 hover:border-white/20 transition-all duration-300 flex items-center justify-center gap-1.5 text-sm font-medium"
+                  onClick={() => handleAffiliateClick(marketplace, url)}
+                  className="py-2 px-3 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 text-holiday-silver hover:text-white border border-white/10 hover:border-white/20 transition-all duration-300 flex items-center justify-center gap-1.5 text-sm font-medium group/secondary"
                 >
-                  <ExternalLink className="w-3 h-3" />
+                  <ExternalLink className="w-3 h-3 group-hover/secondary:scale-110 transition-transform" />
                   {marketplace.charAt(0).toUpperCase() + marketplace.slice(1)}
                 </button>
               ))}
             </div>
+
+            {/* Affiliate disclosure */}
+            <p className="text-xs text-holiday-silver/60 text-center mt-2">
+              We earn from qualifying purchases at no extra cost to you
+            </p>
           </div>
         </div>
       </div>

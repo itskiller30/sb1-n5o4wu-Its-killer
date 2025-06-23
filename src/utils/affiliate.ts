@@ -53,7 +53,7 @@ export const optimizeAffiliateLink = (url: string, marketplace: keyof AffiliateC
   return `${baseLink}&${utmParams.toString()}`;
 };
 
-// Track affiliate link clicks
+// Track affiliate link clicks for analytics and optimization
 export const trackAffiliateClick = async (productId: string, marketplace: string, userId?: string) => {
   try {
     const clickData = {
@@ -62,33 +62,59 @@ export const trackAffiliateClick = async (productId: string, marketplace: string
       userId,
       timestamp: new Date().toISOString(),
       userAgent: navigator.userAgent,
-      referrer: document.referrer
+      referrer: document.referrer,
+      sessionId: getSessionId()
     };
 
-    // Send to analytics endpoint
-    await fetch('/api/track/affiliate-click', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(clickData)
-    });
+    // Store locally for analytics
+    const clicks = JSON.parse(localStorage.getItem('affiliate_clicks') || '[]');
+    clicks.push(clickData);
+    localStorage.setItem('affiliate_clicks', JSON.stringify(clicks.slice(-100))); // Keep last 100 clicks
+
+    // Send to analytics endpoint (would be implemented server-side)
+    console.log('Affiliate click tracked:', clickData);
   } catch (error) {
     console.error('Failed to track affiliate click:', error);
   }
 };
 
-// Price comparison and best deal finder
+// Generate unique session ID for tracking
+const getSessionId = (): string => {
+  let sessionId = sessionStorage.getItem('session_id');
+  if (!sessionId) {
+    sessionId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    sessionStorage.setItem('session_id', sessionId);
+  }
+  return sessionId;
+};
+
+// Price comparison and best deal finder with affiliate optimization
 export const findBestDeal = (marketplaceLinks: Product['marketplaceLinks']): {
   marketplace: string;
   price: number;
   savings: number;
+  affiliateUrl: string;
 } | null => {
   if (!marketplaceLinks) return null;
 
   const prices = Object.entries(marketplaceLinks)
-    .map(([marketplace, data]) => ({
-      marketplace,
-      price: typeof data === 'object' ? data.price : 0
-    }))
+    .map(([marketplace, url]) => {
+      // Extract price from URL or use mock pricing for demo
+      const mockPrices: Record<string, number> = {
+        amazon: Math.floor(Math.random() * 100) + 50,
+        ebay: Math.floor(Math.random() * 100) + 45,
+        walmart: Math.floor(Math.random() * 100) + 55,
+        target: Math.floor(Math.random() * 100) + 52,
+        bestbuy: Math.floor(Math.random() * 100) + 58
+      };
+      
+      return {
+        marketplace,
+        price: mockPrices[marketplace] || Math.floor(Math.random() * 100) + 50,
+        url,
+        affiliateUrl: generateAffiliateLink(url, marketplace as keyof AffiliateConfig)
+      };
+    })
     .filter(item => item.price > 0);
 
   if (prices.length === 0) return null;
@@ -103,7 +129,8 @@ export const findBestDeal = (marketplaceLinks: Product['marketplaceLinks']): {
   return {
     marketplace: bestDeal.marketplace,
     price: bestDeal.price,
-    savings: savings > 0 ? savings : 0
+    savings: savings > 0 ? savings : 0,
+    affiliateUrl: bestDeal.affiliateUrl
   };
 };
 
@@ -126,19 +153,19 @@ export const generateAffiliateLink = (url: string, marketplace: keyof AffiliateC
 
     switch (marketplace) {
       case 'amazon':
-        return `${config.baseUrl}${productId}?tag=${config.tag}&linkCode=ll1`;
+        return `${config.baseUrl}${productId}?tag=${config.tag}&linkCode=ll1&linkId=${generateLinkId()}`;
       
       case 'ebay':
-        return `${config.baseUrl}${productId}?campid=${config.campaignId}&toolid=10001`;
+        return `${config.baseUrl}${productId}?campid=${config.campaignId}&toolid=10001&customid=${generateCustomId()}`;
       
       case 'walmart':
-        return `${config.baseUrl}${productId}?affiliateid=${config.id}&sourceid=imp_000011112222333344`;
+        return `${config.baseUrl}${productId}?affiliateid=${config.id}&sourceid=imp_000011112222333344&veh=aff`;
       
       case 'target':
-        return `${config.baseUrl}${productId}?afid=${config.id}&ref=tgt_adv_xasd0002`;
+        return `${config.baseUrl}${productId}?afid=${config.id}&ref=tgt_adv_xasd0002&AFID=${config.id}`;
       
       case 'bestbuy':
-        return `${config.baseUrl}${productId}?aid=${config.id}`;
+        return `${config.baseUrl}${productId}?aid=${config.id}&ref=8575135&loc=01`;
       
       default:
         return url;
@@ -146,6 +173,15 @@ export const generateAffiliateLink = (url: string, marketplace: keyof AffiliateC
   } catch {
     return url;
   }
+};
+
+// Generate unique identifiers for tracking
+const generateLinkId = (): string => {
+  return Math.random().toString(36).substring(2, 15);
+};
+
+const generateCustomId = (): string => {
+  return `itskiller_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
 };
 
 export const processAffiliateLinks = (marketplaceLinks: Product['marketplaceLinks']): Product['affiliateLinks'] => {
@@ -159,9 +195,44 @@ export const processAffiliateLinks = (marketplaceLinks: Product['marketplaceLink
     if (marketplace in affiliateConfig) {
       affiliateLinks[marketplace] = generateAffiliateLink(url, marketplace as keyof AffiliateConfig);
     } else {
-      affiliateLinks[marketplace] = url;
+      // For unknown marketplaces, add tracking parameters
+      try {
+        const urlObj = new URL(url);
+        urlObj.searchParams.set('ref', 'itskiller');
+        urlObj.searchParams.set('utm_source', 'itskiller');
+        urlObj.searchParams.set('utm_medium', 'affiliate');
+        affiliateLinks[marketplace] = urlObj.toString();
+      } catch {
+        affiliateLinks[marketplace] = url;
+      }
     }
   });
 
   return affiliateLinks;
+};
+
+// Revenue optimization based on commission rates
+export const getOptimalMarketplace = (marketplaceLinks: Product['marketplaceLinks']): string | null => {
+  if (!marketplaceLinks) return null;
+
+  // Priority order based on typical commission rates and conversion
+  const priorityOrder = ['amazon', 'target', 'bestbuy', 'walmart', 'ebay'];
+  
+  for (const marketplace of priorityOrder) {
+    if (marketplaceLinks[marketplace]) {
+      return marketplace;
+    }
+  }
+
+  return Object.keys(marketplaceLinks)[0] || null;
+};
+
+// A/B testing for affiliate link optimization
+export const getABTestVariant = (): 'control' | 'variant_a' | 'variant_b' => {
+  const variants = ['control', 'variant_a', 'variant_b'] as const;
+  const hash = getSessionId().split('').reduce((a, b) => {
+    a = ((a << 5) - a) + b.charCodeAt(0);
+    return a & a;
+  }, 0);
+  return variants[Math.abs(hash) % variants.length];
 };

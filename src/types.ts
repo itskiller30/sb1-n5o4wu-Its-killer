@@ -13,6 +13,7 @@ export interface Product {
     ebay?: string;
     walmart?: string;
     target?: string;
+    bestbuy?: string;
     [key: string]: string | undefined;
   };
   affiliateLinks?: {
@@ -20,6 +21,7 @@ export interface Product {
     ebay?: string;
     walmart?: string;
     target?: string;
+    bestbuy?: string;
     [key: string]: string | undefined;
   };
   lowestPrice?: number;
@@ -39,24 +41,36 @@ export interface MarketplaceLink {
 }
 
 export interface AffiliateConfig {
-  amazon: {
-    tag: string;
+  [key: string]: {
+    tag?: string;
+    campaignId?: string;
+    id?: string;
     baseUrl: string;
     pattern: RegExp;
+    commission: string;
+    cookieDuration: string;
   };
-  ebay: {
-    campaignId: string;
-    baseUrl: string;
-    pattern: RegExp;
-  };
-  walmart: {
-    id: string;
-    baseUrl: string;
-    pattern: RegExp;
-  };
-  target: {
-    id: string;
-    baseUrl: string;
-    pattern: RegExp;
-  };
+}
+
+export interface AffiliateClick {
+  productId: string;
+  marketplace: string;
+  userId?: string;
+  timestamp: string;
+  userAgent: string;
+  referrer: string;
+  sessionId: string;
+}
+
+export interface RevenueMetrics {
+  totalClicks: number;
+  conversionRate: number;
+  averageOrderValue: number;
+  totalCommissions: number;
+  topPerformingProducts: string[];
+  marketplacePerformance: Record<string, {
+    clicks: number;
+    conversions: number;
+    revenue: number;
+  }>;
 }

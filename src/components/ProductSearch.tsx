@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Filter, Loader2, TrendingUp, X, Zap, Star } from 'lucide-react';
 import { searchProducts, SearchResult } from '../services/productSearch';
 import toast from 'react-hot-toast';
@@ -30,7 +30,6 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
   const [isSearching, setIsSearching] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
 
   const popularSearches = [
     'wireless headphones', 'laptop computer', 'smartphone', 'coffee maker',
@@ -49,43 +48,23 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
     'Home Depot', 'Costco', 'Newegg', 'B&H Photo'
   ];
 
-  // Debounced filter change notification
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      onFiltersChange(filters);
-    }, 300);
-
-    return () => clearTimeout(timeoutId);
+    onFiltersChange(filters);
   }, [filters, onFiltersChange]);
 
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (searchTimeout) {
-        clearTimeout(searchTimeout);
-      }
-    };
-  }, [searchTimeout]);
-
-  const performSearch = useCallback(async (searchQuery: string) => {
+  const performSearch = async (searchQuery: string) => {
     if (!searchQuery || searchQuery.trim().length < 2) {
       toast.error('Please enter at least 2 characters');
       return;
     }
     
     const trimmedQuery = searchQuery.trim();
-    
-    // Clear any existing timeout
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    
     setIsSearching(true);
-    console.log('🔍 Starting search for:', trimmedQuery);
+    console.log('Starting search for:', trimmedQuery);
     
     try {
       const results = await searchProducts(trimmedQuery);
-      console.log('📊 Search results received:', results.length);
+      console.log('Search results received:', results.length);
       
       // Apply filters to results
       let filteredResults = results.filter(result => {
@@ -115,28 +94,28 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
         }
       });
 
-      console.log('✨ Filtered results:', filteredResults.length);
+      console.log('Filtered results:', filteredResults.length);
       onResults(filteredResults);
       setSuggestions([]);
       
     } catch (error) {
-      console.error('💥 Search failed:', error);
+      console.error('Search failed:', error);
       toast.error('Search failed. Please try again.');
       onResults([]);
     } finally {
       setIsSearching(false);
     }
-  }, [filters, onResults, searchTimeout]);
+  };
 
-  const handleSearch = useCallback(() => {
+  const handleSearch = () => {
     if (filters.query && filters.query.trim().length >= 2) {
       performSearch(filters.query);
     } else {
       toast.error('Please enter at least 2 characters to search');
     }
-  }, [filters.query, performSearch]);
+  };
 
-  const handleInputChange = useCallback((value: string) => {
+  const handleInputChange = (value: string) => {
     setFilters(prev => ({ ...prev, query: value }));
     
     // Generate suggestions
@@ -148,28 +127,28 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
     } else {
       setSuggestions([]);
     }
-  }, []);
+  };
 
-  const selectSuggestion = useCallback(async (suggestion: string) => {
+  const selectSuggestion = async (suggestion: string) => {
     setFilters(prev => ({ ...prev, query: suggestion }));
     setSuggestions([]);
     
     // Auto-search when suggestion is selected
     await performSearch(suggestion);
-  }, [performSearch]);
+  };
 
-  const clearSearch = useCallback(() => {
+  const clearSearch = () => {
     setFilters(prev => ({ ...prev, query: '' }));
     setSuggestions([]);
     onResults([]);
-  }, [onResults]);
+  };
 
-  const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
+  const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       handleSearch();
     }
-  }, [handleSearch]);
+  };
 
   return (
     <div className="bg-gradient-to-br from-slate-800/60 via-slate-700/40 to-slate-800/60 backdrop-blur-sm rounded-2xl p-8 border border-blue-500/30 shadow-2xl">

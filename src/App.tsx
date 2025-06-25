@@ -117,49 +117,78 @@ function AppContent() {
             </div>
           ) : (
             <div className="space-y-8">
-              {/* Community Header */}
+              {/* Enhanced Community Header with Prominent CTA */}
               <div className="bg-gradient-to-br from-emerald-900/20 via-slate-800/30 to-teal-900/20 backdrop-blur-sm rounded-2xl p-8 border border-emerald-500/30 shadow-2xl">
-                <div className="text-center space-y-6">
+                <div className="text-center space-y-8">
                   <div className="flex items-center justify-center gap-4">
                     <div className="bg-emerald-500/20 p-4 rounded-full border border-emerald-400/30">
-                      <span className="text-4xl">🤝</span>
+                      <span className="text-4xl">⭐</span>
                     </div>
-                    <h2 className="text-4xl font-bold text-white">
-                      Community <span className="text-transparent bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text">Peer-to-Peer</span>
+                    <h2 className="text-5xl font-bold text-white">
+                      Add Your <span className="text-transparent bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text">Killer</span> Item
                     </h2>
                     <div className="bg-teal-500/20 p-4 rounded-full border border-teal-400/30">
-                      <span className="text-4xl">⭐</span>
+                      <span className="text-4xl">🎯</span>
                     </div>
                   </div>
                   
-                  <p className="text-xl text-slate-300 max-w-4xl mx-auto leading-relaxed">
-                    Share your most trusted item with our community. One product per person - 
-                    the item you'd recommend to your best friend without hesitation.
+                  <p className="text-2xl text-slate-300 max-w-4xl mx-auto leading-relaxed">
+                    Share your most trusted product with our community. The one item you'd recommend 
+                    to your best friend without hesitation.
                   </p>
 
-                  {/* Submission Status */}
-                  <div className="bg-slate-800/50 rounded-xl p-6 border border-emerald-500/20 max-w-2xl mx-auto">
+                  {/* Main CTA Section */}
+                  <div className="bg-gradient-to-r from-slate-800/50 via-slate-700/30 to-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-emerald-500/20 max-w-4xl mx-auto">
                     {hasSubmitted ? (
-                      <div className="text-center space-y-3">
-                        <div className="text-6xl">✅</div>
-                        <h3 className="text-xl font-bold text-emerald-400">Thank You!</h3>
-                        <p className="text-slate-300">
+                      <div className="text-center space-y-4">
+                        <div className="text-8xl">✅</div>
+                        <h3 className="text-3xl font-bold text-emerald-400">Thank You!</h3>
+                        <p className="text-xl text-slate-300">
                           Your submission is under review. Our team will verify and publish it soon.
                         </p>
                       </div>
                     ) : (
-                      <div className="text-center space-y-4">
-                        <div className="text-5xl">🎯</div>
-                        <h3 className="text-xl font-bold text-white">Share Your Killer Item</h3>
-                        <p className="text-slate-300 mb-4">
+                      <div className="text-center space-y-6">
+                        <div className="text-7xl">🚀</div>
+                        <h3 className="text-3xl font-bold text-white">Share Your Favorite Product</h3>
+                        <p className="text-xl text-slate-300 mb-6">
                           What's the one product you absolutely can't live without?
                         </p>
+                        
+                        {/* Enhanced CTA Button */}
                         <button
                           onClick={() => setShowSubmission(true)}
-                          className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold px-8 py-4 rounded-xl transition-all duration-300 shadow-lg hover:scale-105 transform"
+                          className="group relative bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-700 hover:via-teal-700 hover:to-cyan-700 text-white font-bold px-12 py-6 rounded-2xl transition-all duration-300 shadow-2xl hover:scale-105 transform text-xl"
                         >
-                          Submit Your Trusted Item
+                          {/* Glow effect */}
+                          <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-cyan-600 rounded-2xl blur opacity-50 group-hover:opacity-75 transition-opacity"></div>
+                          
+                          {/* Button content */}
+                          <div className="relative flex items-center gap-3">
+                            <span className="text-2xl">⭐</span>
+                            <span>Add Your Killer Item</span>
+                            <span className="text-2xl">🎯</span>
+                          </div>
                         </button>
+
+                        {/* Feature highlights */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+                          <div className="bg-emerald-500/10 rounded-xl p-4 border border-emerald-500/20">
+                            <div className="text-3xl mb-2">🔍</div>
+                            <h4 className="font-bold text-emerald-400 mb-2">Smart Search Integration</h4>
+                            <p className="text-sm text-slate-300">We'll search all major retailers to find the best prices</p>
+                          </div>
+                          <div className="bg-blue-500/10 rounded-xl p-4 border border-blue-500/20">
+                            <div className="text-3xl mb-2">💰</div>
+                            <h4 className="font-bold text-blue-400 mb-2">Affiliate Links Added</h4>
+                            <p className="text-sm text-slate-300">Automatic affiliate integration for all purchase links</p>
+                          </div>
+                          <div className="bg-purple-500/10 rounded-xl p-4 border border-purple-500/20">
+                            <div className="text-3xl mb-2">🎯</div>
+                            <h4 className="font-bold text-purple-400 mb-2">One Per Person</h4>
+                            <p className="text-sm text-slate-300">Choose your absolute favorite - quality over quantity</p>
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -194,7 +223,7 @@ function AppContent() {
           )}
         </div>
 
-        {/* Submission Form Modal */}
+        {/* Enhanced Submission Form Modal */}
         {showSubmission && (
           <SubmissionForm 
             onSubmit={handleSubmission}
@@ -204,7 +233,7 @@ function AppContent() {
         )}
       </div>
 
-      {/* Floating Action Button - Only show on community tab */}
+      {/* Enhanced Floating Action Button - Only show on community tab */}
       {activeTab === 'community' && !hasSubmitted && (
         <FloatingActionButton onShare={() => setShowSubmission(true)} />
       )}

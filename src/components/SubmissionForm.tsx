@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { X, Share2, Star, DollarSign, Link, Upload, Heart, CheckCircle, AlertCircle } from 'lucide-react';
+import { X, Share2, Star, DollarSign, Link, Search, Loader2, CheckCircle, AlertCircle, ShoppingCart, Award } from 'lucide-react';
 import { Product } from '../types';
+import { searchProducts, SearchResult } from '../services/productSearch';
+import { generateAffiliateLink, findBestDeal } from '../utils/affiliate';
 import toast from 'react-hot-toast';
 
 interface SubmissionFormProps {
@@ -23,7 +25,10 @@ const SubmissionForm: React.FC<SubmissionFormProps> = ({ onSubmit, onClose, hasS
   });
 
   const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 3;
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [selectedResults, setSelectedResults] = useState<SearchResult[]>([]);
+  const totalSteps = 4;
 
   const categories = [
     'Tech Essentials', 'Home & Kitchen', 'Outdoor Gear', 'Office Must-Haves',
@@ -40,23 +45,74 @@ const SubmissionForm: React.FC<SubmissionFormProps> = ({ onSubmit, onClose, hasS
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const addMarketplaceUrl = () => {
-    const marketplace = `store${Object.keys(formData.marketplaceUrls).length + 1}`;
-    setFormData(prev => ({
-      ...prev,
-      marketplaceUrls: { ...prev.marketplaceUrls, [marketplace]: '' }
-    }));
+  // Enhanced product search with affiliate integration
+  const handleProductSearch = async () => {
+    if (!formData.name || formData.name.length < 3) {
+      toast.error('Please enter at least 3 characters to search');
+      return;
+    }
+
+    setIsSearching(true);
+    setSearchResults([]);
+
+    try {
+      const results = await searchProducts(formData.name);
+      
+      // Filter for high-quality results and add affiliate links
+      const enhancedResults = results
+        .filter(result => !result.rating || result.rating >= 4.0) // Only high-rated products
+        .slice(0, 10) // Limit to top 10 results
+        .map(result => ({
+          ...result,
+          affiliateUrl: generateAffiliateLink(result.url, result.marketplace.toLowerCase() as any)
+        }));
+
+      setSearchResults(enhancedResults);
+      
+      if (enhancedResults.length > 0) {
+        toast.success(`Found ${enhancedResults.length} high-quality matches with best prices!`);
+      } else {
+        toast.error('No high-rated products found. Try a different search term.');
+      }
+    } catch (error) {
+      toast.error('Search failed. Please try entering details manually.');
+    } finally {
+      setIsSearching(false);
+    }
   };
 
-  const updateMarketplaceUrl = (key: string, value: string) => {
+  const selectSearchResult = (result: SearchResult) => {
+    const marketplace = result.marketplace.toLowerCase().replace(/\s+/g, '');
+    
+    // Update form data with selected result
     setFormData(prev => ({
       ...prev,
-      marketplaceUrls: { ...prev.marketplaceUrls, [key]: value }
+      name: prev.name || result.title,
+      price: result.price.toString(),
+      marketplaceUrls: {
+        ...prev.marketplaceUrls,
+        [marketplace]: result.url
+      }
     }));
+
+    // Add to selected results for affiliate processing
+    setSelectedResults(prev => {
+      const existing = prev.find(r => r.marketplace === result.marketplace);
+      if (existing) {
+        return prev.map(r => r.marketplace === result.marketplace ? result : r);
+      }
+      return [...prev, result];
+    });
+
+    toast.success(`Added ${result.marketplace} link with affiliate integration!`);
   };
 
-  const removeMarketplaceUrl = (key: string) => {
-    const { [key]: removed, ...rest } = formData.marketplaceUrls;
+  const removeSelectedResult = (marketplace: string) => {
+    const marketplaceKey = marketplace.toLowerCase().replace(/\s+/g, '');
+    
+    setSelectedResults(prev => prev.filter(r => r.marketplace !== marketplace));
+    
+    const { [marketplaceKey]: removed, ...rest } = formData.marketplaceUrls;
     setFormData(prev => ({ ...prev, marketplaceUrls: rest }));
   };
 
@@ -67,7 +123,9 @@ const SubmissionForm: React.FC<SubmissionFormProps> = ({ onSubmit, onClose, hasS
       case 2:
         return !!(formData.personalStory && formData.whyTrusted && formData.howLongUsed);
       case 3:
-        return true; // Optional step
+        return true; // Search step is optional
+      case 4:
+        return true; // Review step
       default:
         return false;
     }
@@ -93,21 +151,45 @@ const SubmissionForm: React.FC<SubmissionFormProps> = ({ onSubmit, onClose, hasS
       return;
     }
 
+    // Process affiliate links for all selected results
+    const processedMarketplaceLinks: Record<string, string> = {};
+    const affiliateLinks: Record<string, string> = {};
+
+    selectedResults.forEach(result => {
+      const marketplace = result.marketplace.toLowerCase().replace(/\s+/g, '');
+      processedMarketplaceLinks[marketplace] = result.url;
+      affiliateLinks[marketplace] = generateAffiliateLink(result.url, marketplace as any);
+    });
+
+    // Add any manually entered URLs
+    Object.entries(formData.marketplaceUrls).forEach(([marketplace, url]) => {
+      if (url && !processedMarketplaceLinks[marketplace]) {
+        processedMarketplaceLinks[marketplace] = url;
+        affiliateLinks[marketplace] = generateAffiliateLink(url, marketplace as any);
+      }
+    });
+
+    // Find the best deal from selected results
+    const bestDeal = findBestDeal(processedMarketplaceLinks);
+
     const submission: Omit<Product, 'id'> = {
       name: formData.name,
       description: formData.description,
-      price: parseFloat(formData.price) || 0,
+      price: parseFloat(formData.price) || (bestDeal?.price || 0),
       rating: 10 + Math.random() * 2, // Random rating between 10-12
       reviews: Math.floor(Math.random() * 100) + 10,
       category: formData.category,
-      tags: ['Community Pick', 'Peer Reviewed'],
-      image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&q=80&w=800',
-      marketplaceLinks: formData.marketplaceUrls,
+      tags: ['Community Pick', 'Peer Reviewed', 'Affiliate Verified'],
+      image: searchResults.length > 0 ? searchResults[0].image || 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&q=80&w=800' : 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&q=80&w=800',
+      marketplaceLinks: processedMarketplaceLinks,
+      affiliateLinks,
+      lowestPrice: bestDeal?.price,
+      lowestPriceMarketplace: bestDeal?.marketplace,
       status: 'pending',
       submittedAt: new Date().toISOString()
     };
 
-    toast.success('Thank you for sharing your trusted item! Our team will review it soon.');
+    toast.success('Thank you for sharing your killer item! Affiliate links have been automatically added.');
     onSubmit(submission);
   };
 
@@ -134,7 +216,7 @@ const SubmissionForm: React.FC<SubmissionFormProps> = ({ onSubmit, onClose, hasS
 
   return (
     <div className="fixed inset-0 bg-black/75 flex items-center justify-center p-4 z-50">
-      <div className="bg-slate-800 rounded-2xl p-6 w-full max-w-3xl border border-emerald-500/30 relative max-h-[90vh] overflow-y-auto">
+      <div className="bg-slate-800 rounded-2xl p-6 w-full max-w-4xl border border-emerald-500/30 relative max-h-[90vh] overflow-y-auto">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors z-10"
@@ -145,11 +227,11 @@ const SubmissionForm: React.FC<SubmissionFormProps> = ({ onSubmit, onClose, hasS
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
           <div className="bg-gradient-to-r from-emerald-500 to-teal-500 p-3 rounded-full">
-            <Heart className="w-6 h-6 text-white" />
+            <Star className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-white">Share Your Most Trusted Item</h2>
-            <p className="text-slate-400">Help others discover something life-changing</p>
+            <h2 className="text-2xl font-bold text-white">Add Your Killer Item</h2>
+            <p className="text-slate-400">Share your favorite product with smart price comparison</p>
           </div>
         </div>
 
@@ -173,7 +255,7 @@ const SubmissionForm: React.FC<SubmissionFormProps> = ({ onSubmit, onClose, hasS
             <div className="space-y-6">
               <div className="text-center mb-6">
                 <div className="text-4xl mb-2">🎯</div>
-                <h3 className="text-xl font-bold text-white">Tell us about your trusted item</h3>
+                <h3 className="text-xl font-bold text-white">Tell us about your killer item</h3>
                 <p className="text-slate-400">What's the product you can't live without?</p>
               </div>
 
@@ -320,60 +402,146 @@ const SubmissionForm: React.FC<SubmissionFormProps> = ({ onSubmit, onClose, hasS
             </div>
           )}
 
-          {/* Step 3: Purchase Links (Optional) */}
+          {/* Step 3: Smart Product Search with Affiliate Integration */}
           {currentStep === 3 && (
             <div className="space-y-6">
               <div className="text-center mb-6">
-                <div className="text-4xl mb-2">🔗</div>
-                <h3 className="text-xl font-bold text-white">Add purchase links (optional)</h3>
-                <p className="text-slate-400">Help others find where to buy this product</p>
+                <div className="text-4xl mb-2">🔍</div>
+                <h3 className="text-xl font-bold text-white">Find Best Prices & Add Affiliate Links</h3>
+                <p className="text-slate-400">We'll search all major retailers and add affiliate links automatically</p>
               </div>
 
-              <div className="space-y-3">
-                {Object.entries(formData.marketplaceUrls).map(([key, url]) => (
-                  <div key={key} className="flex gap-2">
-                    <div className="relative flex-1">
-                      <input
-                        type="url"
-                        value={url}
-                        onChange={(e) => updateMarketplaceUrl(key, e.target.value)}
-                        className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 pl-10 text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
-                        placeholder="https://amazon.com/product-link..."
-                      />
-                      <Link className="absolute left-3 top-3.5 w-4 h-4 text-slate-400" />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeMarketplaceUrl(key)}
-                      className="px-3 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
+              {/* Search Interface */}
+              <div className="bg-slate-700/30 rounded-xl p-6 border border-slate-600/50">
+                <div className="flex gap-3 mb-4">
+                  <div className="flex-1 relative">
+                    <input
+                      type="text"
+                      value={formData.name}
+                      onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                      className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 pl-10 text-white focus:outline-none focus:border-emerald-500"
+                      placeholder="Search for your product..."
+                    />
+                    <Search className="absolute left-3 top-3.5 w-4 h-4 text-slate-400" />
                   </div>
-                ))}
-                
-                <button
-                  type="button"
-                  onClick={addMarketplaceUrl}
-                  className="text-emerald-400 hover:text-emerald-300 text-sm font-medium flex items-center gap-2"
-                >
-                  <span className="text-lg">+</span>
-                  Add purchase link
-                </button>
+                  <button
+                    type="button"
+                    onClick={handleProductSearch}
+                    disabled={isSearching || !formData.name}
+                    className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2"
+                  >
+                    {isSearching ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Search className="w-4 h-4" />
+                    )}
+                    Search
+                  </button>
+                </div>
+
+                {/* Search Results */}
+                {searchResults.length > 0 && (
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-semibold text-slate-300">Found {searchResults.length} results with affiliate integration:</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
+                      {searchResults.map((result, index) => (
+                        <div key={index} className="bg-slate-800/50 rounded-lg p-3 border border-slate-600/30">
+                          <div className="flex items-start gap-3">
+                            {result.image && (
+                              <img src={result.image} alt={result.title} className="w-12 h-12 rounded object-cover" />
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <h5 className="text-sm font-medium text-white line-clamp-2">{result.title}</h5>
+                              <div className="flex items-center justify-between mt-2">
+                                <div className="text-emerald-400 font-bold">${result.price}</div>
+                                <div className="text-xs text-slate-400">{result.marketplace}</div>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => selectSearchResult(result)}
+                                className="mt-2 text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded transition-colors"
+                              >
+                                Add with Affiliate Link
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Selected Results */}
+                {selectedResults.length > 0 && (
+                  <div className="mt-6 space-y-3">
+                    <h4 className="text-sm font-semibold text-emerald-400">Selected with Affiliate Links:</h4>
+                    {selectedResults.map((result, index) => (
+                      <div key={index} className="bg-emerald-500/10 rounded-lg p-3 border border-emerald-500/30 flex items-center justify-between">
+                        <div>
+                          <div className="text-sm font-medium text-white">{result.marketplace}</div>
+                          <div className="text-emerald-400 font-bold">${result.price}</div>
+                          <div className="text-xs text-slate-400">✓ Affiliate link added</div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeSelectedResult(result.marketplace)}
+                          className="text-red-400 hover:text-red-300 transition-colors"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Step 4: Review & Submit */}
+          {currentStep === 4 && (
+            <div className="space-y-6">
+              <div className="text-center mb-6">
+                <div className="text-4xl mb-2">📋</div>
+                <h3 className="text-xl font-bold text-white">Review Your Submission</h3>
+                <p className="text-slate-400">Make sure everything looks good before submitting</p>
               </div>
 
-              {/* Final Guidelines */}
-              <div className="bg-slate-700/30 rounded-lg p-4 border border-slate-600/50">
-                <h4 className="text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-emerald-400" />
-                  Ready to Submit
-                </h4>
-                <ul className="text-xs text-slate-400 space-y-1">
-                  <li>• Your submission will be reviewed by our team</li>
-                  <li>• We'll verify the product and your experience</li>
-                  <li>• Once approved, it will appear in our community section</li>
-                  <li>• Remember: only one submission per person</li>
-                </ul>
+              <div className="bg-slate-700/30 rounded-xl p-6 border border-slate-600/50 space-y-4">
+                <div>
+                  <h4 className="text-sm font-semibold text-slate-300 mb-2">Product Details</h4>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div><span className="text-slate-400">Name:</span> <span className="text-white">{formData.name}</span></div>
+                    <div><span className="text-slate-400">Category:</span> <span className="text-white">{formData.category}</span></div>
+                    <div><span className="text-slate-400">Price:</span> <span className="text-emerald-400">${formData.price}</span></div>
+                    <div><span className="text-slate-400">Usage:</span> <span className="text-white">{formData.howLongUsed}</span></div>
+                  </div>
+                </div>
+
+                {selectedResults.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-semibold text-slate-300 mb-2">Affiliate Links ({selectedResults.length})</h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      {selectedResults.map((result, index) => (
+                        <div key={index} className="bg-emerald-500/10 rounded px-3 py-2 border border-emerald-500/20">
+                          <div className="text-xs text-emerald-400">{result.marketplace} - ${result.price}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="bg-emerald-500/10 rounded-lg p-4 border border-emerald-500/20">
+                  <div className="flex items-center gap-2 mb-2">
+                    <CheckCircle className="w-4 h-4 text-emerald-400" />
+                    <span className="text-sm font-semibold text-emerald-400">Ready to Submit</span>
+                  </div>
+                  <ul className="text-xs text-slate-400 space-y-1">
+                    <li>• Affiliate links will be automatically processed</li>
+                    <li>• Your submission will be reviewed by our team</li>
+                    <li>• Once approved, it will appear in our community section</li>
+                    <li>• You'll earn from qualifying purchases at no extra cost to buyers</li>
+                  </ul>
+                </div>
               </div>
             </div>
           )}
@@ -409,9 +577,10 @@ const SubmissionForm: React.FC<SubmissionFormProps> = ({ onSubmit, onClose, hasS
               ) : (
                 <button
                   type="submit"
-                  className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold px-8 py-3 rounded-lg transition-all duration-300 shadow-lg"
+                  className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold px-8 py-3 rounded-lg transition-all duration-300 shadow-lg flex items-center gap-2"
                 >
-                  Submit for Review
+                  <Award className="w-4 h-4" />
+                  Submit Killer Item
                 </button>
               )}
             </div>

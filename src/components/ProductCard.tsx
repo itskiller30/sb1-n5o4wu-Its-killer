@@ -1,7 +1,6 @@
 import React from 'react';
-import { Star, ThumbsUp, ShoppingCart, ExternalLink, Award, Shield, Users, Zap } from 'lucide-react';
+import { Star, ThumbsUp, ShoppingCart, ExternalLink, Award, Zap } from 'lucide-react';
 import { Product } from '../types';
-import { trackAffiliateClick, generateAffiliateLink, findBestDeal } from '../utils/affiliate';
 
 interface ProductCardProps {
   product: Product;
@@ -9,13 +8,9 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, featured = false }) => {
-  const handlePurchaseClick = async (marketplace: string, url: string) => {
-    await trackAffiliateClick(product.id, marketplace);
-    const affiliateUrl = generateAffiliateLink(url, marketplace as any);
-    window.open(affiliateUrl, '_blank', 'noopener,noreferrer');
+  const handlePurchaseClick = (marketplace: string, url: string) => {
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
-
-  const bestDeal = findBestDeal(product.marketplaceLinks);
 
   const cardClasses = featured 
     ? "group bg-gradient-to-br from-slate-800/90 via-slate-700/70 to-slate-800/90 backdrop-blur-sm rounded-2xl overflow-hidden border border-emerald-500/40 shadow-2xl hover:border-emerald-400/60 transition-all duration-300"
@@ -32,27 +27,18 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, featured = false }) 
         />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60"></div>
         
-        {/* Badges */}
-        <div className="absolute top-3 right-3 flex flex-col gap-2">
-          <div className="bg-gradient-to-r from-emerald-500/90 to-teal-500/90 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
-            <Zap className="w-3 h-3" />
-            {product.rating.toFixed(1)}
-          </div>
-          {featured && (
-            <div className="bg-gradient-to-r from-yellow-500/90 to-orange-500/90 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
-              <Award className="w-3 h-3" />
-              Featured
-            </div>
-          )}
+        {/* Rating Badge */}
+        <div className="absolute top-3 right-3 bg-emerald-500/90 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
+          <Zap className="w-3 h-3" />
+          {product.rating.toFixed(1)}
         </div>
 
-        <div className="absolute top-3 left-3 flex flex-col gap-2">
-          {bestDeal && (
-            <div className="bg-green-500/90 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
-              Best Price
-            </div>
-          )}
-        </div>
+        {featured && (
+          <div className="absolute top-3 left-3 bg-yellow-500/90 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
+            <Award className="w-3 h-3" />
+            Featured
+          </div>
+        )}
       </div>
 
       {/* Content */}
@@ -66,26 +52,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, featured = false }) 
         </p>
 
         <div className="flex items-center justify-between mb-4">
-          <div className="space-y-1">
-            {bestDeal ? (
-              <div>
-                <span className="text-xl font-bold text-green-400">
-                  ${bestDeal.price.toLocaleString()}
-                </span>
-                <div className="text-xs text-green-400 flex items-center gap-1">
-                  <Star className="w-3 h-3" />
-                  Best at {bestDeal.marketplace}
-                </div>
-              </div>
-            ) : (
-              <span className="text-xl font-bold text-emerald-400">
-                ${product.price.toLocaleString()}
-              </span>
-            )}
-          </div>
+          <span className="text-xl font-bold text-emerald-400">
+            ${product.price.toLocaleString()}
+          </span>
           
           <div className="flex items-center gap-1 text-slate-400 group-hover:text-slate-300 transition-colors">
-            <Users className="w-4 h-4" />
+            <ThumbsUp className="w-4 h-4" />
             <span className="text-sm">{product.reviews.toLocaleString()}</span>
           </div>
         </div>
@@ -104,28 +76,18 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, featured = false }) 
 
         {/* Purchase Options */}
         <div className="space-y-2">
-          {bestDeal ? (
-            <button
-              onClick={() => handlePurchaseClick(bestDeal.marketplace, product.marketplaceLinks[bestDeal.marketplace] || '')}
-              className="w-full py-3 px-4 rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:scale-105 transform"
-            >
-              <ShoppingCart className="w-4 h-4" />
-              Best Price: ${bestDeal.price}
-            </button>
-          ) : (
-            <button
-              onClick={() => handlePurchaseClick('amazon', product.marketplaceLinks.amazon || '')}
-              className="w-full py-3 px-4 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:scale-105 transform"
-            >
-              <ShoppingCart className="w-4 h-4" />
-              Buy Now - ${product.price.toLocaleString()}
-            </button>
-          )}
+          <button
+            onClick={() => handlePurchaseClick('amazon', product.marketplaceLinks.amazon || '')}
+            className="w-full py-3 px-4 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:scale-105 transform"
+          >
+            <ShoppingCart className="w-4 h-4" />
+            Buy Now - ${product.price.toLocaleString()}
+          </button>
           
           {/* Secondary marketplace options */}
           <div className="grid grid-cols-2 gap-2">
             {Object.entries(product.marketplaceLinks)
-              .filter(([marketplace]) => marketplace !== bestDeal?.marketplace)
+              .filter(([marketplace]) => marketplace !== 'amazon')
               .slice(0, 2)
               .map(([marketplace, url]) => (
               <button

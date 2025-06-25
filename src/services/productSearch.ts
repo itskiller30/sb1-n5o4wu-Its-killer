@@ -11,7 +11,7 @@ export interface SearchResult {
   shippingInfo?: string;
 }
 
-// Static product database for reliable search
+// Static product database - no complexity
 const STATIC_PRODUCTS: SearchResult[] = [
   {
     title: 'Sony WH-1000XM4 Wireless Noise Canceling Headphones',
@@ -135,17 +135,20 @@ const STATIC_PRODUCTS: SearchResult[] = [
   }
 ];
 
-// Simple, reliable search function
+// Simple search function
 export const searchProducts = (query: string): Promise<SearchResult[]> => {
   return new Promise((resolve) => {
+    // Basic validation
     if (!query || query.trim().length < 2) {
       resolve([]);
       return;
     }
 
+    // Short delay to simulate search
     setTimeout(() => {
       const searchTerm = query.toLowerCase().trim();
       
+      // Simple text matching
       const results = STATIC_PRODUCTS.filter(product => 
         product.title.toLowerCase().includes(searchTerm) ||
         product.category.toLowerCase().includes(searchTerm) ||
@@ -153,6 +156,6 @@ export const searchProducts = (query: string): Promise<SearchResult[]> => {
       );
 
       resolve(results);
-    }, 300);
+    }, 200);
   });
 };

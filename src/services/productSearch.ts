@@ -11,8 +11,8 @@ export interface SearchResult {
   shippingInfo?: string;
 }
 
-// Static product database - no complexity
-const STATIC_PRODUCTS: SearchResult[] = [
+// Ultra-simple static database - no complexity at all
+const PRODUCTS: SearchResult[] = [
   {
     title: 'Sony WH-1000XM4 Wireless Noise Canceling Headphones',
     price: 279.99,
@@ -74,18 +74,6 @@ const STATIC_PRODUCTS: SearchResult[] = [
     shippingInfo: 'Free shipping with Prime'
   },
   {
-    title: 'Breville Espresso Machine',
-    price: 749.99,
-    url: 'https://williams-sonoma.com/breville-espresso',
-    image: 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&q=80&w=400',
-    marketplace: 'Williams Sonoma',
-    rating: 4.6,
-    reviews: 3420,
-    category: 'Home & Kitchen',
-    inStock: true,
-    shippingInfo: 'Free shipping $99+'
-  },
-  {
     title: 'Apple iPhone 15 Pro Max 256GB',
     price: 1199.00,
     url: 'https://amazon.com/dp/B0CHX1W1XY',
@@ -96,66 +84,29 @@ const STATIC_PRODUCTS: SearchResult[] = [
     category: 'Electronics',
     inStock: true,
     shippingInfo: 'Free shipping with Prime'
-  },
-  {
-    title: 'iPhone 15 Pro Max 256GB',
-    price: 1199.00,
-    url: 'https://apple.com/iphone-15-pro',
-    image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&q=80&w=400',
-    marketplace: 'Apple Store',
-    rating: 4.8,
-    reviews: 25430,
-    category: 'Electronics',
-    inStock: true,
-    shippingInfo: 'Free shipping'
-  },
-  {
-    title: 'Vitamix A3500 Ascent Series Blender',
-    price: 549.95,
-    url: 'https://amazon.com/dp/B077JBQZPX',
-    image: 'https://images.unsplash.com/photo-1570197788417-0e82375c9371?auto=format&fit=crop&q=80&w=400',
-    marketplace: 'Amazon',
-    rating: 4.5,
-    reviews: 6789,
-    category: 'Home & Kitchen',
-    inStock: true,
-    shippingInfo: 'Free shipping with Prime'
-  },
-  {
-    title: 'Vitamix Ascent A3500 Blender',
-    price: 599.95,
-    url: 'https://vitamix.com/us/en_us/shop/a3500',
-    image: 'https://images.unsplash.com/photo-1570197788417-0e82375c9371?auto=format&fit=crop&q=80&w=400',
-    marketplace: 'Vitamix',
-    rating: 4.6,
-    reviews: 4320,
-    category: 'Home & Kitchen',
-    inStock: true,
-    shippingInfo: 'Free shipping $75+'
   }
 ];
 
-// Simple search function
+// Extremely simple search - just filter the static array
 export const searchProducts = (query: string): Promise<SearchResult[]> => {
   return new Promise((resolve) => {
-    // Basic validation
+    // Simple validation
     if (!query || query.trim().length < 2) {
       resolve([]);
       return;
     }
 
-    // Short delay to simulate search
+    // Fixed delay
     setTimeout(() => {
       const searchTerm = query.toLowerCase().trim();
       
       // Simple text matching
-      const results = STATIC_PRODUCTS.filter(product => 
+      const results = PRODUCTS.filter(product => 
         product.title.toLowerCase().includes(searchTerm) ||
-        product.category.toLowerCase().includes(searchTerm) ||
-        product.marketplace.toLowerCase().includes(searchTerm)
+        product.category.toLowerCase().includes(searchTerm)
       );
 
       resolve(results);
-    }, 200);
+    }, 300); // Shorter delay
   });
 };

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Loader2, TrendingUp, X } from 'lucide-react';
+import { Search, Filter, Loader2, TrendingUp, X, Zap, Star } from 'lucide-react';
 import { searchProducts, SearchResult } from '../services/productSearch';
 import toast from 'react-hot-toast';
 
@@ -22,9 +22,9 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
     query: '',
     category: '',
     priceRange: [0, 1000],
-    rating: 0,
+    rating: 4,
     marketplace: '',
-    sortBy: 'relevance'
+    sortBy: 'rating'
   });
   
   const [isSearching, setIsSearching] = useState(false);
@@ -65,9 +65,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
     
     setIsSearching(true);
     try {
-      console.log('Searching for:', filters.query);
       const results = await searchProducts(filters.query);
-      console.log('Search results:', results);
       
       // Apply filters to results
       let filteredResults = results.filter(result => {
@@ -101,9 +99,9 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
       setSuggestions([]);
       
       if (filteredResults.length > 0) {
-        toast.success(`Found ${filteredResults.length} products!`);
+        toast.success(`Found ${filteredResults.length} top-rated products!`);
       } else {
-        toast.error('No products found. Try different search terms.');
+        toast.error('No highly-rated products found. Try different search terms.');
       }
     } catch (error) {
       console.error('Search failed:', error);
@@ -135,9 +133,15 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
     setIsSearching(true);
     try {
       const results = await searchProducts(suggestion);
-      onResults(results);
-      if (results.length > 0) {
-        toast.success(`Found ${results.length} products!`);
+      
+      // Apply rating filter (4+ stars minimum)
+      const filteredResults = results.filter(result => 
+        !result.rating || result.rating >= 4
+      ).sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      
+      onResults(filteredResults);
+      if (filteredResults.length > 0) {
+        toast.success(`Found ${filteredResults.length} top-rated products!`);
       }
     } catch (error) {
       console.error('Auto-search failed:', error);
@@ -154,8 +158,22 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
   };
 
   return (
-    <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700 shadow-xl">
-      <div className="space-y-6">
+    <div className="bg-gradient-to-br from-slate-800/60 via-slate-700/40 to-slate-800/60 backdrop-blur-sm rounded-2xl p-8 border border-blue-500/30 shadow-2xl">
+      <div className="space-y-8">
+        {/* Search Header */}
+        <div className="text-center space-y-4">
+          <div className="flex items-center justify-center gap-3">
+            <Zap className="w-8 h-8 text-blue-400 animate-pulse" />
+            <h2 className="text-3xl font-bold text-white">
+              Search <span className="text-transparent bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text">itsKiller</span> Products
+            </h2>
+            <Star className="w-8 h-8 text-yellow-400 animate-twinkle" />
+          </div>
+          <p className="text-slate-300 text-lg">
+            Find the highest-rated products across all major retailers in seconds
+          </p>
+        </div>
+
         {/* Main Search Bar */}
         <div className="relative">
           <div className="relative">
@@ -164,16 +182,16 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
               value={filters.query}
               onChange={(e) => handleInputChange(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-              placeholder="Search for products across all marketplaces..."
-              className="w-full bg-gray-700/50 border border-gray-600 rounded-xl px-6 py-4 pl-14 pr-32 text-white text-lg placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+              placeholder="Search for products (e.g., wireless headphones, coffee maker, laptop)..."
+              className="w-full bg-slate-700/50 border border-slate-600 rounded-xl px-6 py-5 pl-16 pr-36 text-white text-xl placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all shadow-lg"
             />
-            <Search className="absolute left-5 top-5 w-6 h-6 text-blue-400" />
+            <Search className="absolute left-6 top-6 w-7 h-7 text-blue-400" />
             
-            <div className="absolute right-3 top-2 flex gap-2">
+            <div className="absolute right-3 top-2.5 flex gap-2">
               {filters.query && (
                 <button
                   onClick={clearSearch}
-                  className="p-2 text-gray-400 hover:text-white transition-colors"
+                  className="p-2 text-slate-400 hover:text-white transition-colors"
                   title="Clear search"
                 >
                   <X className="w-5 h-5" />
@@ -182,7 +200,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
               <button
                 onClick={handleSearch}
                 disabled={isSearching || !filters.query.trim()}
-                className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-slate-600 disabled:to-slate-600 disabled:cursor-not-allowed text-white px-8 py-3 rounded-lg font-bold transition-all duration-300 flex items-center gap-2 shadow-lg hover:scale-105 transform"
               >
                 {isSearching ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
@@ -196,16 +214,16 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
 
           {/* Search Suggestions */}
           {suggestions.length > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-gray-800 border border-gray-600 rounded-xl shadow-xl z-10 max-h-60 overflow-y-auto">
+            <div className="absolute top-full left-0 right-0 mt-2 bg-slate-800 border border-slate-600 rounded-xl shadow-xl z-10 max-h-60 overflow-y-auto">
               {suggestions.map((suggestion, index) => (
                 <button
                   key={index}
                   onClick={() => selectSuggestion(suggestion)}
-                  className="w-full text-left px-4 py-3 hover:bg-gray-700 text-white first:rounded-t-xl last:rounded-b-xl transition-colors"
+                  className="w-full text-left px-6 py-4 hover:bg-slate-700 text-white first:rounded-t-xl last:rounded-b-xl transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <TrendingUp className="w-4 h-4 text-blue-400" />
-                    <span className="font-medium">{suggestion}</span>
+                    <TrendingUp className="w-5 h-5 text-blue-400" />
+                    <span className="font-medium text-lg">{suggestion}</span>
                   </div>
                 </button>
               ))}
@@ -214,35 +232,34 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
         </div>
 
         {/* Quick Filters */}
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-4 justify-center">
           <button
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
+            className={`flex items-center gap-2 px-6 py-3 rounded-lg border transition-all duration-300 ${
               showAdvanced 
-                ? 'bg-blue-600 text-white border-blue-600' 
-                : 'bg-gray-700 text-gray-300 border-gray-600 hover:border-blue-500 hover:text-white'
+                ? 'bg-blue-600 text-white border-blue-600 shadow-lg' 
+                : 'bg-slate-700 text-slate-300 border-slate-600 hover:border-blue-500 hover:text-white hover:bg-slate-600'
             }`}
           >
-            <Filter className="w-4 h-4" />
+            <Filter className="w-5 h-5" />
             Advanced Filters
           </button>
 
           <select
             value={filters.sortBy}
             onChange={(e) => setFilters(prev => ({ ...prev, sortBy: e.target.value as any }))}
-            className="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+            className="px-6 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500 text-lg"
           >
-            <option value="relevance">Most Relevant</option>
+            <option value="rating">Highest Rated First</option>
             <option value="price_low">Price: Low to High</option>
             <option value="price_high">Price: High to Low</option>
-            <option value="rating">Highest Rated</option>
             <option value="reviews">Most Reviews</option>
           </select>
 
           <select
             value={filters.marketplace}
             onChange={(e) => setFilters(prev => ({ ...prev, marketplace: e.target.value }))}
-            className="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+            className="px-6 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500 text-lg"
           >
             {marketplaces.map(marketplace => (
               <option key={marketplace} value={marketplace === 'All Stores' ? '' : marketplace}>
@@ -254,14 +271,14 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
 
         {/* Advanced Filters */}
         {showAdvanced && (
-          <div className="bg-gray-700/30 rounded-xl p-4 border border-gray-600/50 space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="bg-slate-700/30 rounded-xl p-6 border border-slate-600/50 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label className="block text-gray-300 text-sm mb-2">Category</label>
+                <label className="block text-slate-300 text-lg mb-3 font-medium">Category</label>
                 <select
                   value={filters.category}
                   onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value }))}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500 text-lg"
                 >
                   {categories.map(category => (
                     <option key={category} value={category === 'All Categories' ? '' : category}>
@@ -272,10 +289,10 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
               </div>
 
               <div>
-                <label className="block text-gray-300 text-sm mb-2">
+                <label className="block text-slate-300 text-lg mb-3 font-medium">
                   Price Range: ${filters.priceRange[0]} - ${filters.priceRange[1]}
                 </label>
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   <input
                     type="number"
                     value={filters.priceRange[0]}
@@ -283,7 +300,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
                       ...prev, 
                       priceRange: [Number(e.target.value), prev.priceRange[1]] 
                     }))}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                    className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500 text-lg"
                     placeholder="Min"
                   />
                   <input
@@ -293,15 +310,15 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
                       ...prev, 
                       priceRange: [prev.priceRange[0], Number(e.target.value)] 
                     }))}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                    className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500 text-lg"
                     placeholder="Max"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-gray-300 text-sm mb-2">
-                  Minimum Rating: {filters.rating}/5
+                <label className="block text-slate-300 text-lg mb-3 font-medium">
+                  Minimum Rating: {filters.rating}/5 ⭐
                 </label>
                 <input
                   type="range"
@@ -310,8 +327,12 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
                   step="0.5"
                   value={filters.rating}
                   onChange={(e) => setFilters(prev => ({ ...prev, rating: Number(e.target.value) }))}
-                  className="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
+                  className="w-full h-3 bg-slate-600 rounded-lg appearance-none cursor-pointer slider"
                 />
+                <div className="flex justify-between text-sm text-slate-400 mt-2">
+                  <span>Any</span>
+                  <span>Excellent</span>
+                </div>
               </div>
             </div>
           </div>
@@ -319,13 +340,13 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
 
         {/* Popular Searches */}
         <div>
-          <p className="text-gray-400 text-sm mb-3">Popular Searches:</p>
-          <div className="flex flex-wrap gap-2">
+          <p className="text-slate-300 text-lg mb-4 font-medium text-center">🔥 Popular Searches:</p>
+          <div className="flex flex-wrap gap-3 justify-center">
             {popularSearches.slice(0, 8).map((search, index) => (
               <button
                 key={index}
                 onClick={() => selectSuggestion(search)}
-                className="px-3 py-1.5 bg-gray-700/50 hover:bg-gray-600/50 text-gray-300 hover:text-white rounded-full text-sm border border-gray-600/50 hover:border-blue-500/50 transition-all"
+                className="px-4 py-2 bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 hover:text-white rounded-full text-sm border border-slate-600/50 hover:border-blue-500/50 transition-all hover:scale-105 transform"
               >
                 {search}
               </button>
@@ -335,9 +356,14 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
 
         {/* Search Status */}
         {isSearching && (
-          <div className="flex items-center justify-center py-4">
-            <Loader2 className="w-6 h-6 animate-spin text-blue-500 mr-3" />
-            <span className="text-gray-300">Searching across all marketplaces...</span>
+          <div className="flex items-center justify-center py-6">
+            <div className="bg-blue-500/20 rounded-full p-4 border border-blue-400/30">
+              <Loader2 className="w-8 h-8 animate-spin text-blue-400" />
+            </div>
+            <div className="ml-4">
+              <div className="text-blue-400 font-bold text-lg">Searching all platforms...</div>
+              <div className="text-slate-400">Finding the best deals and highest ratings</div>
+            </div>
           </div>
         )}
       </div>

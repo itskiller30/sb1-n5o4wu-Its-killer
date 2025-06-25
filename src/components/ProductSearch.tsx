@@ -53,16 +53,17 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
   }, [filters, onFiltersChange]);
 
   const performSearch = async (searchQuery: string) => {
-    if (!searchQuery || searchQuery.length < 2) {
+    if (!searchQuery || searchQuery.trim().length < 2) {
       toast.error('Please enter at least 2 characters');
       return;
     }
     
+    const trimmedQuery = searchQuery.trim();
     setIsSearching(true);
-    console.log('Starting search for:', searchQuery);
+    console.log('Starting search for:', trimmedQuery);
     
     try {
-      const results = await searchProducts(searchQuery);
+      const results = await searchProducts(trimmedQuery);
       console.log('Search results received:', results.length);
       
       // Apply filters to results
@@ -97,11 +98,6 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
       onResults(filteredResults);
       setSuggestions([]);
       
-      if (filteredResults.length > 0) {
-        toast.success(`Found ${filteredResults.length} top-rated products!`);
-      } else {
-        toast.error('No highly-rated products found. Try different search terms.');
-      }
     } catch (error) {
       console.error('Search failed:', error);
       toast.error('Search failed. Please try again.');
@@ -112,7 +108,11 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
   };
 
   const handleSearch = () => {
-    performSearch(filters.query);
+    if (filters.query && filters.query.trim().length >= 2) {
+      performSearch(filters.query);
+    } else {
+      toast.error('Please enter at least 2 characters to search');
+    }
   };
 
   const handleInputChange = (value: string) => {
@@ -193,7 +193,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
               )}
               <button
                 onClick={handleSearch}
-                disabled={isSearching || !filters.query.trim()}
+                disabled={isSearching || !filters.query.trim() || filters.query.trim().length < 2}
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-slate-600 disabled:to-slate-600 disabled:cursor-not-allowed text-white px-8 py-3 rounded-lg font-bold transition-all duration-300 flex items-center gap-2 shadow-lg hover:scale-105 transform"
               >
                 {isSearching ? (

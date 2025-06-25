@@ -77,27 +77,13 @@ const SAMPLE_PRODUCTS: Record<string, Partial<SearchResult>[]> = {
     { title: 'Bose SoundLink Revolve+ Portable Bluetooth Speaker', price: 329.00, rating: 4.3, reviews: 6780 },
     { title: 'Ultimate Ears BOOM 3 Portable Bluetooth Speaker', price: 149.99, rating: 4.4, reviews: 5430 },
     { title: 'Amazon Echo Dot (5th Gen) Smart Speaker with Alexa', price: 49.99, rating: 4.5, reviews: 25670 }
-  ],
-  'watch': [
-    { title: 'Apple Watch Series 9 GPS 45mm Midnight Aluminum', price: 429.00, rating: 4.7, reviews: 18920 },
-    { title: 'Samsung Galaxy Watch6 Classic 47mm Bluetooth', price: 429.99, rating: 4.5, reviews: 8740 },
-    { title: 'Garmin Forerunner 965 GPS Running Smartwatch', price: 599.99, rating: 4.6, reviews: 5230 },
-    { title: 'Fitbit Versa 4 Fitness Smartwatch', price: 199.95, rating: 4.3, reviews: 12340 },
-    { title: 'Amazfit GTR 4 Smart Watch for Men Women', price: 199.99, rating: 4.4, reviews: 6780 }
-  ],
-  'tablet': [
-    { title: 'Apple iPad Pro 12.9-inch M2 Wi-Fi 128GB', price: 1099.00, rating: 4.8, reviews: 15420 },
-    { title: 'Samsung Galaxy Tab S9 Ultra 14.6" 256GB', price: 1199.99, rating: 4.6, reviews: 8930 },
-    { title: 'Microsoft Surface Pro 9 13" Touch Screen', price: 999.99, rating: 4.4, reviews: 5670 },
-    { title: 'Amazon Fire HD 10 tablet 10.1" 1080p Full HD', price: 149.99, rating: 4.3, reviews: 24567 },
-    { title: 'Lenovo Tab P11 Plus 11" Android Tablet', price: 229.99, rating: 4.2, reviews: 3420 }
   ]
 };
 
 // Enhanced search simulation with more realistic data
 const searchMarketplace = async (query: string, marketplace: Marketplace): Promise<SearchResult[]> => {
   // Simulate realistic network latency
-  await new Promise(resolve => setTimeout(resolve, Math.random() * 500 + 200));
+  await new Promise(resolve => setTimeout(resolve, Math.random() * 800 + 300));
 
   console.log(`Searching ${marketplace} for: ${query}`);
 
@@ -108,7 +94,7 @@ const searchMarketplace = async (query: string, marketplace: Marketplace): Promi
   // Check for exact matches in sample data
   for (const [category, products] of Object.entries(SAMPLE_PRODUCTS)) {
     if (queryLower.includes(category) || category.includes(queryLower) || 
-        queryLower.split(' ').some(word => word.length > 2 && category.includes(word))) {
+        queryLower.split(' ').some(word => category.includes(word))) {
       matchingProducts = [...matchingProducts, ...products];
     }
   }
@@ -207,8 +193,7 @@ const getProductImage = (query: string): string => {
     'fitness': 'photo-1571019613454-1cb2f99b2d8b',
     'book': 'photo-1481627834876-b7833e8f5570',
     'gaming': 'photo-1493711662062-fa541adb3fc8',
-    'speaker': 'photo-1608043152269-423dbba4e7e1',
-    'tablet': 'photo-1544244015-0df4b3ffc6b0'
+    'speaker': 'photo-1608043152269-423dbba4e7e1'
   };
 
   const category = Object.keys(imageCategories).find(cat => 
@@ -232,9 +217,7 @@ const inferCategory = (query: string): string => {
     'car|automotive|vehicle|tire': 'Automotive',
     'tool|hardware|drill|hammer': 'Tools & Home Improvement',
     'gaming|mouse|keyboard|headset|monitor': 'Electronics',
-    'coffee|espresso|maker|grinder': 'Home & Kitchen',
-    'watch|smartwatch|fitness': 'Electronics',
-    'tablet|ipad': 'Electronics'
+    'coffee|espresso|maker|grinder': 'Home & Kitchen'
   };
 
   for (const [keywords, category] of Object.entries(categories)) {
@@ -267,7 +250,6 @@ const getShippingInfo = (marketplace: string): string => {
 export const searchProducts = async (query: string): Promise<SearchResult[]> => {
   if (!query || query.length < 2) {
     console.log('Query too short:', query);
-    toast.error('Please enter at least 2 characters to search');
     return [];
   }
 
@@ -311,18 +293,10 @@ export const searchProducts = async (query: string): Promise<SearchResult[]> => 
     const finalResults = sortedResults.slice(0, 24);
     
     console.log('Final results count:', finalResults.length);
-    
-    if (finalResults.length === 0) {
-      toast.error(`No results found for "${query}". Try different keywords.`);
-    } else {
-      toast.success(`Found ${finalResults.length} products across all retailers!`);
-    }
-    
     return finalResults;
   } catch (error) {
     console.error('Search failed:', error);
-    toast.error('Search service temporarily unavailable. Please try again.');
-    return [];
+    throw new Error('Search service temporarily unavailable');
   }
 };
 

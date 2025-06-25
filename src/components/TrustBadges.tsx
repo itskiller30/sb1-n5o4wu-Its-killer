@@ -40,7 +40,7 @@ const TrustBadges: React.FC = () => {
   const trustIndicators = [
     {
       icon: <Award className="w-6 h-6 text-yellow-400" />,
-      title: 'itsKiller Certified',
+      title: 'Community Tested',
       description: 'Products tested by our expert community',
       bgColor: 'yellow-500/10',
       borderColor: 'yellow-500/20'
@@ -122,7 +122,7 @@ const TrustBadges: React.FC = () => {
         ))}
       </div>
 
-      {/* Enhanced Value Proposition */}
+      {/* Enhanced Value Proposition - No Promises */}
       <div className="bg-gradient-to-br from-slate-800/80 via-slate-700/60 to-slate-800/80 backdrop-blur-sm rounded-2xl p-8 border border-emerald-500/30 shadow-2xl">
         <div className="text-center">
           <div className="inline-flex items-center gap-4 mb-6">
@@ -130,7 +130,7 @@ const TrustBadges: React.FC = () => {
               <Zap className="w-10 h-10 text-emerald-400" />
             </div>
             <h2 className="text-4xl font-bold text-white">
-              The <span className="text-transparent bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text">itsKiller</span> Promise
+              The <span className="text-transparent bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text">itsKiller</span> Approach
             </h2>
             <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 p-4 rounded-full border border-yellow-400/30">
               <Crown className="w-10 h-10 text-yellow-400" />
@@ -138,9 +138,9 @@ const TrustBadges: React.FC = () => {
           </div>
           
           <p className="text-xl text-slate-300 mb-8 max-w-4xl mx-auto leading-relaxed">
-            Every product in our <strong className="text-transparent bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-2xl">itsKiller</strong> collection has been personally 
-            tested by our expert community or verified by trusted members. We stand behind every recommendation 
-            with our reputation and your satisfaction.
+            Every product in our <strong className="text-transparent bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-2xl">itsKiller</strong> collection has been 
+            personally tested by our community members or verified through real-world use. We focus on quality over quantity 
+            and honest experiences over marketing hype.
           </p>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -154,7 +154,7 @@ const TrustBadges: React.FC = () => {
               <span className="text-red-400 font-bold text-sm group-hover:text-red-300 transition-colors">✓ Honest Reviews</span>
             </div>
             <div className="bg-purple-500/10 rounded-xl px-4 py-3 border border-purple-500/30 hover:border-purple-400/50 transition-colors group">
-              <span className="text-purple-400 font-bold text-sm group-hover:text-purple-300 transition-colors">✓ Quality Guarantee</span>
+              <span className="text-purple-400 font-bold text-sm group-hover:text-purple-300 transition-colors">✓ Real Experiences</span>
             </div>
           </div>
 

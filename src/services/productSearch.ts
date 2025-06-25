@@ -13,11 +13,8 @@ export interface SearchResult {
   shippingInfo?: string;
 }
 
-const MARKETPLACES = ['Amazon', 'eBay', 'Walmart', 'Target', 'Best Buy'] as const;
-export type Marketplace = typeof MARKETPLACES[number];
-
-// Simplified, reliable product database
-const PRODUCT_DATABASE: Record<string, SearchResult[]> = {
+// Ultra-simple, static product database - no randomization, no complexity
+const SIMPLE_PRODUCTS: Record<string, SearchResult[]> = {
   'headphones': [
     {
       title: 'Sony WH-1000XM4 Wireless Noise Canceling Headphones',
@@ -42,6 +39,18 @@ const PRODUCT_DATABASE: Record<string, SearchResult[]> = {
       category: 'Electronics',
       inStock: true,
       shippingInfo: 'Free shipping $35+'
+    },
+    {
+      title: 'Sony WH-1000XM4 Noise Canceling Headphones',
+      price: 289.99,
+      url: 'https://target.com/p/sony-headphones',
+      image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=400',
+      marketplace: 'Target',
+      rating: 4.3,
+      reviews: 6780,
+      category: 'Electronics',
+      inStock: true,
+      shippingInfo: 'Same-day delivery available'
     }
   ],
   'laptop': [
@@ -82,18 +91,6 @@ const PRODUCT_DATABASE: Record<string, SearchResult[]> = {
       category: 'Home & Kitchen',
       inStock: true,
       shippingInfo: 'Free shipping with Prime'
-    },
-    {
-      title: 'Breville Barista Express Coffee Machine',
-      price: 749.99,
-      url: 'https://target.com/p/breville-barista',
-      image: 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&q=80&w=400',
-      marketplace: 'Target',
-      rating: 4.3,
-      reviews: 6780,
-      category: 'Home & Kitchen',
-      inStock: true,
-      shippingInfo: 'Free shipping $35+'
     }
   ],
   'phone': [
@@ -108,144 +105,49 @@ const PRODUCT_DATABASE: Record<string, SearchResult[]> = {
       category: 'Electronics',
       inStock: true,
       shippingInfo: 'Free shipping with Prime'
-    },
-    {
-      title: 'iPhone 15 Pro Max 256GB Natural Titanium',
-      price: 1199.99,
-      url: 'https://target.com/p/iphone-15-pro-max',
-      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&q=80&w=400',
-      marketplace: 'Target',
-      rating: 4.6,
-      reviews: 14560,
-      category: 'Electronics',
-      inStock: true,
-      shippingInfo: 'Same-day delivery available'
-    }
-  ],
-  'kitchen': [
-    {
-      title: 'KitchenAid Stand Mixer Artisan Series',
-      price: 379.99,
-      url: 'https://amazon.com/dp/B00005UP2P',
-      image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&q=80&w=400',
-      marketplace: 'Amazon',
-      rating: 4.7,
-      reviews: 12340,
-      category: 'Home & Kitchen',
-      inStock: true,
-      shippingInfo: 'Free shipping with Prime'
-    },
-    {
-      title: 'Instant Pot Duo 7-in-1 Electric Pressure Cooker',
-      price: 99.95,
-      url: 'https://walmart.com/ip/instant-pot-duo',
-      image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&q=80&w=400',
-      marketplace: 'Walmart',
-      rating: 4.6,
-      reviews: 87654,
-      category: 'Home & Kitchen',
-      inStock: true,
-      shippingInfo: 'Free 2-day shipping $35+'
     }
   ]
 };
 
-// Simple, reliable search function
-export const searchProducts = async (query: string): Promise<SearchResult[]> => {
-  // Input validation
-  if (!query || typeof query !== 'string' || query.trim().length < 2) {
-    return [];
-  }
-
-  const searchTerm = query.toLowerCase().trim();
-  console.log('🔍 Searching for:', searchTerm);
-
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 800));
-
-  try {
-    let results: SearchResult[] = [];
-
-    // Direct category matches
-    for (const [category, products] of Object.entries(PRODUCT_DATABASE)) {
-      if (searchTerm.includes(category) || category.includes(searchTerm)) {
-        results.push(...products);
-      }
+// Ultra-simple search function - no async complexity, no randomization
+export const searchProducts = (query: string): Promise<SearchResult[]> => {
+  return new Promise((resolve) => {
+    // Simple validation
+    if (!query || query.trim().length < 2) {
+      resolve([]);
+      return;
     }
 
-    // Keyword search in product titles
-    if (results.length === 0) {
-      const allProducts = Object.values(PRODUCT_DATABASE).flat();
-      results = allProducts.filter(product => 
-        product.title.toLowerCase().includes(searchTerm) ||
-        searchTerm.split(' ').some(word => 
-          word.length > 2 && product.title.toLowerCase().includes(word)
-        )
-      );
-    }
+    // Simple delay to show loading state
+    setTimeout(() => {
+      const searchTerm = query.toLowerCase().trim();
+      let results: SearchResult[] = [];
 
-    // Generate additional marketplace results
-    if (results.length > 0) {
-      const baseProduct = results[0];
-      const additionalResults: SearchResult[] = [];
-
-      MARKETPLACES.forEach(marketplace => {
-        if (!results.some(r => r.marketplace === marketplace)) {
-          const priceVariation = 0.9 + Math.random() * 0.2; // ±10% price variation
-          additionalResults.push({
-            ...baseProduct,
-            marketplace,
-            price: Math.round(baseProduct.price * priceVariation * 100) / 100,
-            url: `https://${marketplace.toLowerCase()}.com/product/${Math.random().toString(36).substring(7)}`,
-            reviews: Math.floor(baseProduct.reviews * (0.5 + Math.random() * 0.5)),
-            shippingInfo: getShippingInfo(marketplace)
-          });
+      // Direct keyword matching
+      for (const [keyword, products] of Object.entries(SIMPLE_PRODUCTS)) {
+        if (searchTerm.includes(keyword) || keyword.includes(searchTerm)) {
+          results.push(...products);
+          break; // Only return first match to keep it simple
         }
-      });
+      }
 
-      results.push(...additionalResults);
-    }
+      // If no direct match, return a generic result
+      if (results.length === 0) {
+        results = [{
+          title: `${query} - Premium Quality`,
+          price: 99.99,
+          url: `https://amazon.com/search?k=${encodeURIComponent(query)}`,
+          image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&q=80&w=400',
+          marketplace: 'Amazon',
+          rating: 4.2,
+          reviews: 1250,
+          category: 'General',
+          inStock: true,
+          shippingInfo: 'Free shipping with Prime'
+        }];
+      }
 
-    // Fallback: generate generic results
-    if (results.length === 0) {
-      const basePrice = 50 + Math.random() * 200;
-      results = MARKETPLACES.slice(0, 3).map((marketplace, index) => ({
-        title: `${query} - ${marketplace} Option`,
-        price: Math.round((basePrice + index * 20) * 100) / 100,
-        url: `https://${marketplace.toLowerCase()}.com/search?q=${encodeURIComponent(query)}`,
-        image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&q=80&w=400',
-        marketplace,
-        rating: 4.0 + Math.random() * 1.0,
-        reviews: Math.floor(Math.random() * 5000) + 500,
-        category: 'General',
-        inStock: true,
-        shippingInfo: getShippingInfo(marketplace)
-      }));
-    }
-
-    // Sort by value (rating * reviews / price)
-    results.sort((a, b) => {
-      const scoreA = ((a.rating || 0) * Math.log(a.reviews || 1)) / a.price;
-      const scoreB = ((b.rating || 0) * Math.log(b.reviews || 1)) / b.price;
-      return scoreB - scoreA;
-    });
-
-    console.log('✅ Search completed:', results.length, 'results');
-    return results.slice(0, 12); // Limit to 12 results
-
-  } catch (error) {
-    console.error('❌ Search error:', error);
-    return [];
-  }
-};
-
-const getShippingInfo = (marketplace: string): string => {
-  const shippingOptions: Record<string, string> = {
-    'Amazon': 'Free shipping with Prime',
-    'eBay': 'Varies by seller',
-    'Walmart': 'Free 2-day shipping $35+',
-    'Target': 'Same-day delivery available',
-    'Best Buy': 'Free shipping $35+'
-  };
-  return shippingOptions[marketplace] || 'Standard shipping';
+      resolve(results);
+    }, 500); // Fixed 500ms delay
+  });
 };

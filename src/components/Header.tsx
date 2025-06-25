@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Star, Award, TrendingUp, Zap, Crown, Sparkles } from 'lucide-react';
+import { Search, Star, Award, TrendingUp, Zap, Crown, Sparkles, Target, Users } from 'lucide-react';
 
 const Header: React.FC = () => {
   return (
@@ -44,96 +44,86 @@ const Header: React.FC = () => {
             <div className="flex items-center justify-center gap-4">
               <div className="h-px bg-gradient-to-r from-transparent via-blue-400 to-transparent flex-1 max-w-20"></div>
               <p className="text-2xl font-bold text-transparent bg-gradient-to-r from-slate-300 to-slate-100 bg-clip-text px-6 italic">
-                Find the Best Products Everywhere
+                Two Simple Options
               </p>
               <div className="h-px bg-gradient-to-r from-transparent via-blue-400 to-transparent flex-1 max-w-20"></div>
             </div>
           </div>
         </div>
 
-        {/* Search Mission Statement */}
+        {/* Two Main Options */}
         <div className="bg-gradient-to-br from-slate-800/80 via-slate-700/60 to-slate-800/80 backdrop-blur-sm rounded-2xl p-8 border border-blue-500/30 max-w-6xl mx-auto shadow-2xl">
-          <div className="flex items-center justify-center gap-8 mb-6 flex-wrap">
-            <div className="flex items-center gap-3 text-blue-400 group hover:scale-105 transition-transform">
-              <div className="bg-blue-500/20 p-2 rounded-full group-hover:bg-blue-500/30 transition-colors">
-                <Search className="w-6 h-6" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Option 1: Find Products */}
+            <div className="text-center group hover:scale-105 transition-transform duration-300">
+              <div className="bg-gradient-to-br from-blue-500/20 to-blue-600/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:from-blue-500/30 group-hover:to-blue-600/20 transition-colors border border-blue-400/30">
+                <Search className="w-10 h-10 text-blue-400" />
               </div>
-              <span className="text-lg font-bold">Search All Platforms</span>
-            </div>
-            <div className="flex items-center gap-3 text-green-400 group hover:scale-105 transition-transform">
-              <div className="bg-green-500/20 p-2 rounded-full group-hover:bg-green-500/30 transition-colors">
-                <Star className="w-6 h-6 fill-green-400" />
+              <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-blue-400 transition-colors">
+                🔍 Find Killer Products
+              </h3>
+              <p className="text-slate-400 text-lg group-hover:text-slate-300 transition-colors leading-relaxed">
+                Search across all major retailers for the highest-rated products at the best prices
+              </p>
+              <div className="mt-4 flex flex-wrap justify-center gap-2">
+                <span className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm border border-blue-500/30">10+ Retailers</span>
+                <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm border border-green-500/30">Best Prices</span>
+                <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-sm border border-purple-500/30">Top Rated</span>
               </div>
-              <span className="text-lg font-bold">Top Rated Only</span>
             </div>
-            <div className="flex items-center gap-3 text-purple-400 group hover:scale-105 transition-transform">
-              <div className="bg-purple-500/20 p-2 rounded-full group-hover:bg-purple-500/30 transition-colors">
-                <TrendingUp className="w-6 h-6" />
+            
+            {/* Option 2: Submit Products */}
+            <div className="text-center group hover:scale-105 transition-transform duration-300">
+              <div className="bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:from-emerald-500/30 group-hover:to-emerald-600/20 transition-colors border border-emerald-400/30">
+                <Star className="w-10 h-10 text-emerald-400 fill-emerald-400" />
               </div>
-              <span className="text-lg font-bold">Best Prices</span>
+              <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-emerald-400 transition-colors">
+                ⭐ Submit Killer Products
+              </h3>
+              <p className="text-slate-400 text-lg group-hover:text-slate-300 transition-colors leading-relaxed">
+                Share your favorite product with our community and help others discover amazing items
+              </p>
+              <div className="mt-4 flex flex-wrap justify-center gap-2">
+                <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-sm border border-emerald-500/30">Auto Search</span>
+                <span className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm border border-blue-500/30">Affiliate Links</span>
+                <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-sm border border-purple-500/30">Community</span>
+              </div>
             </div>
           </div>
-          
-          <p className="text-xl text-slate-300 leading-relaxed text-center max-w-4xl mx-auto">
-            <strong className="text-transparent bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-2xl">itsKiller</strong> searches 
-            Amazon, eBay, Walmart, Target, Best Buy, and more to find you the highest-rated products at the best prices. 
-            No more endless scrolling—just the cream of the crop.
-          </p>
-        </div>
-      </div>
 
-      {/* Search Features */}
-      <div className="relative z-10 bg-gradient-to-r from-slate-900/80 via-slate-800/60 to-slate-900/80 backdrop-blur-sm rounded-2xl p-8 border border-blue-500/20 max-w-7xl mx-auto shadow-2xl">
-        <div className="text-center mb-8">
-          <h2 className="text-4xl font-bold text-white mb-4">
-            Why <span className="text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text">itsKiller</span> Search?
-          </h2>
-          <p className="text-slate-300 text-lg max-w-4xl mx-auto">
-            Stop wasting time comparing prices and reading fake reviews. We do the heavy lifting for you.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="text-center group hover:scale-105 transition-transform duration-300">
-            <div className="bg-gradient-to-br from-blue-500/20 to-blue-600/10 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:from-blue-500/30 group-hover:to-blue-600/20 transition-colors border border-blue-400/30">
-              <Search className="w-12 h-12 text-blue-400" />
+          {/* Enhanced Value Proposition */}
+          <div className="mt-8 pt-8 border-t border-slate-700/50">
+            <div className="text-center">
+              <h2 className="text-3xl font-bold text-white mb-4">
+                Why <span className="text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text">itsKiller</span>?
+              </h2>
+              <p className="text-slate-300 text-lg max-w-4xl mx-auto mb-6">
+                Stop wasting time comparing prices and reading fake reviews. We do the heavy lifting for you.
+              </p>
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-blue-500/10 rounded-xl p-4 border border-blue-500/20 hover:border-blue-400/40 transition-colors group">
+                  <Target className="w-8 h-8 text-blue-400 mx-auto mb-2 group-hover:scale-110 transition-transform" />
+                  <div className="text-sm font-bold text-blue-400">Multi-Platform</div>
+                  <div className="text-xs text-slate-400">Search everywhere</div>
+                </div>
+                <div className="bg-emerald-500/10 rounded-xl p-4 border border-emerald-500/20 hover:border-emerald-400/40 transition-colors group">
+                  <Award className="w-8 h-8 text-emerald-400 mx-auto mb-2 group-hover:scale-110 transition-transform" />
+                  <div className="text-sm font-bold text-emerald-400">Quality First</div>
+                  <div className="text-xs text-slate-400">Only the best</div>
+                </div>
+                <div className="bg-purple-500/10 rounded-xl p-4 border border-purple-500/20 hover:border-purple-400/40 transition-colors group">
+                  <TrendingUp className="w-8 h-8 text-purple-400 mx-auto mb-2 group-hover:scale-110 transition-transform" />
+                  <div className="text-sm font-bold text-purple-400">Best Prices</div>
+                  <div className="text-xs text-slate-400">Auto comparison</div>
+                </div>
+                <div className="bg-yellow-500/10 rounded-xl p-4 border border-yellow-500/20 hover:border-yellow-400/40 transition-colors group">
+                  <Users className="w-8 h-8 text-yellow-400 mx-auto mb-2 group-hover:scale-110 transition-transform" />
+                  <div className="text-sm font-bold text-yellow-400">Community</div>
+                  <div className="text-xs text-slate-400">Real reviews</div>
+                </div>
+              </div>
             </div>
-            <h3 className="text-lg font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">Multi-Platform Search</h3>
-            <p className="text-slate-400 text-sm group-hover:text-slate-300 transition-colors">Search 10+ major retailers simultaneously</p>
-          </div>
-          
-          <div className="text-center group hover:scale-105 transition-transform duration-300">
-            <div className="bg-gradient-to-br from-green-500/20 to-green-600/10 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:from-green-500/30 group-hover:to-green-600/20 transition-colors border border-green-400/30">
-              <Star className="w-12 h-12 text-green-400 fill-green-400" />
-            </div>
-            <h3 className="text-lg font-bold text-white mb-2 group-hover:text-green-400 transition-colors">Quality Filter</h3>
-            <p className="text-slate-400 text-sm group-hover:text-slate-300 transition-colors">Only shows highly-rated products</p>
-          </div>
-          
-          <div className="text-center group hover:scale-105 transition-transform duration-300">
-            <div className="bg-gradient-to-br from-purple-500/20 to-purple-600/10 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:from-purple-500/30 group-hover:to-purple-600/20 transition-colors border border-purple-400/30">
-              <TrendingUp className="w-12 h-12 text-purple-400" />
-            </div>
-            <h3 className="text-lg font-bold text-white mb-2 group-hover:text-purple-400 transition-colors">Price Comparison</h3>
-            <p className="text-slate-400 text-sm group-hover:text-slate-300 transition-colors">Automatically finds the best deals</p>
-          </div>
-          
-          <div className="text-center group hover:scale-105 transition-transform duration-300">
-            <div className="bg-gradient-to-br from-yellow-500/20 to-orange-500/10 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:from-yellow-500/30 group-hover:to-orange-500/20 transition-colors border border-yellow-400/30">
-              <Zap className="w-12 h-12 text-yellow-400" />
-            </div>
-            <h3 className="text-lg font-bold text-white mb-2 group-hover:text-yellow-400 transition-colors">Lightning Fast</h3>
-            <p className="text-slate-400 text-sm group-hover:text-slate-300 transition-colors">Get results in seconds, not hours</p>
-          </div>
-        </div>
-
-        {/* Call to Action */}
-        <div className="mt-8 text-center">
-          <div className="inline-flex items-center gap-4 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 backdrop-blur-sm px-8 py-4 rounded-full border border-blue-400/30 hover:border-blue-400/50 transition-colors group">
-            <Award className="w-6 h-6 text-blue-400 group-hover:scale-110 transition-transform" />
-            <span className="text-blue-400 font-bold text-lg">
-              Start searching for <span className="text-transparent bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text">killer</span> products now
-            </span>
           </div>
         </div>
       </div>

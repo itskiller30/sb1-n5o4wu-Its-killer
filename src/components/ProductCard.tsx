@@ -47,10 +47,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, featured = false }) 
         </div>
 
         <div className="absolute top-3 left-3 flex flex-col gap-2">
-          <div className="bg-slate-900/90 backdrop-blur-sm text-emerald-400 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 border border-emerald-500/30">
-            <Shield className="w-3 h-3" />
-            <span className="text-transparent bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text">itsKiller</span> Verified
-          </div>
           {bestDeal && (
             <div className="bg-green-500/90 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
               Best Price

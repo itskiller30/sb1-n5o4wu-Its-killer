@@ -1,71 +1,23 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Search, Filter, Loader2, TrendingUp, X, Zap, Star } from 'lucide-react';
+import React, { useState, useCallback } from 'react';
+import { Search, Loader2, TrendingUp, X, Zap, Star } from 'lucide-react';
 import { searchProducts, SearchResult } from '../services/productSearch';
 import toast from 'react-hot-toast';
 
 interface ProductSearchProps {
   onResults: (results: SearchResult[]) => void;
-  onFiltersChange: (filters: SearchFilters) => void;
-}
-
-interface SearchFilters {
-  query: string;
-  category: string;
-  priceRange: [number, number];
-  rating: number;
-  marketplace: string;
-  sortBy: 'relevance' | 'price_low' | 'price_high' | 'rating' | 'reviews';
+  onFiltersChange: (filters: any) => void;
 }
 
 const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChange }) => {
-  const [filters, setFilters] = useState<SearchFilters>({
-    query: '',
-    category: '',
-    priceRange: [0, 1000],
-    rating: 4,
-    marketplace: '',
-    sortBy: 'rating'
-  });
-  
+  const [query, setQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
-  const [showAdvanced, setShowAdvanced] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
 
   const popularSearches = [
     'wireless headphones', 'laptop computer', 'smartphone', 'coffee maker',
     'kitchen appliances', 'fitness equipment', 'office chair', 'gaming mouse',
     'bluetooth speaker', 'tablet', 'smartwatch', 'air fryer'
   ];
-
-  const categories = [
-    'All Categories', 'Electronics', 'Home & Kitchen', 'Sports & Outdoors',
-    'Office Products', 'Health & Personal Care', 'Automotive', 'Books',
-    'Clothing & Accessories', 'Tools & Home Improvement'
-  ];
-
-  const marketplaces = [
-    'All Stores', 'Amazon', 'eBay', 'Walmart', 'Target', 'Best Buy',
-    'Home Depot', 'Costco', 'Newegg', 'B&H Photo'
-  ];
-
-  // Debounced filter change notification
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      onFiltersChange(filters);
-    }, 300);
-
-    return () => clearTimeout(timeoutId);
-  }, [filters, onFiltersChange]);
-
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (searchTimeout) {
-        clearTimeout(searchTimeout);
-      }
-    };
-  }, [searchTimeout]);
 
   const performSearch = useCallback(async (searchQuery: string) => {
     if (!searchQuery || searchQuery.trim().length < 2) {
@@ -74,50 +26,22 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
     }
     
     const trimmedQuery = searchQuery.trim();
-    
-    // Clear any existing timeout
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    
     setIsSearching(true);
-    console.log('🔍 Starting search for:', trimmedQuery);
+    setSuggestions([]);
     
     try {
+      console.log('🔍 Starting search for:', trimmedQuery);
       const results = await searchProducts(trimmedQuery);
-      console.log('📊 Search results received:', results.length);
       
-      // Apply filters to results
-      let filteredResults = results.filter(result => {
-        const matchesCategory = !filters.category || filters.category === 'All Categories' || 
-          result.category?.toLowerCase().includes(filters.category.toLowerCase());
-        const matchesPrice = result.price >= filters.priceRange[0] && result.price <= filters.priceRange[1];
-        const matchesRating = !filters.rating || !result.rating || result.rating >= filters.rating;
-        const matchesMarketplace = !filters.marketplace || filters.marketplace === 'All Stores' || 
-          result.marketplace === filters.marketplace;
-        
-        return matchesCategory && matchesPrice && matchesRating && matchesMarketplace;
-      });
-
-      // Sort results
-      filteredResults = filteredResults.sort((a, b) => {
-        switch (filters.sortBy) {
-          case 'price_low':
-            return a.price - b.price;
-          case 'price_high':
-            return b.price - a.price;
-          case 'rating':
-            return (b.rating || 0) - (a.rating || 0);
-          case 'reviews':
-            return (b.reviews || 0) - (a.reviews || 0);
-          default:
-            return 0;
-        }
-      });
-
-      console.log('✨ Filtered results:', filteredResults.length);
-      onResults(filteredResults);
-      setSuggestions([]);
+      console.log('📊 Search results received:', results.length);
+      onResults(results);
+      onFiltersChange({ query: trimmedQuery });
+      
+      if (results.length > 0) {
+        toast.success(`Found ${results.length} products across all retailers!`);
+      } else {
+        toast.error(`No results found for "${trimmedQuery}". Try different keywords.`);
+      }
       
     } catch (error) {
       console.error('💥 Search failed:', error);
@@ -126,18 +50,18 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
     } finally {
       setIsSearching(false);
     }
-  }, [filters, onResults, searchTimeout]);
+  }, [onResults, onFiltersChange]);
 
   const handleSearch = useCallback(() => {
-    if (filters.query && filters.query.trim().length >= 2) {
-      performSearch(filters.query);
+    if (query && query.trim().length >= 2) {
+      performSearch(query);
     } else {
       toast.error('Please enter at least 2 characters to search');
     }
-  }, [filters.query, performSearch]);
+  }, [query, performSearch]);
 
   const handleInputChange = useCallback((value: string) => {
-    setFilters(prev => ({ ...prev, query: value }));
+    setQuery(value);
     
     // Generate suggestions
     if (value.length > 1) {
@@ -151,15 +75,13 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
   }, []);
 
   const selectSuggestion = useCallback(async (suggestion: string) => {
-    setFilters(prev => ({ ...prev, query: suggestion }));
+    setQuery(suggestion);
     setSuggestions([]);
-    
-    // Auto-search when suggestion is selected
     await performSearch(suggestion);
   }, [performSearch]);
 
   const clearSearch = useCallback(() => {
-    setFilters(prev => ({ ...prev, query: '' }));
+    setQuery('');
     setSuggestions([]);
     onResults([]);
   }, [onResults]);
@@ -193,7 +115,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
           <div className="relative">
             <input
               type="text"
-              value={filters.query}
+              value={query}
               onChange={(e) => handleInputChange(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Search for products (e.g., wireless headphones, coffee maker, laptop)..."
@@ -203,7 +125,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
             <Search className="absolute left-6 top-6 w-7 h-7 text-blue-400" />
             
             <div className="absolute right-3 top-2.5 flex gap-2">
-              {filters.query && !isSearching && (
+              {query && !isSearching && (
                 <button
                   onClick={clearSearch}
                   className="p-2 text-slate-400 hover:text-white transition-colors"
@@ -214,7 +136,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
               )}
               <button
                 onClick={handleSearch}
-                disabled={isSearching || !filters.query.trim() || filters.query.trim().length < 2}
+                disabled={isSearching || !query.trim() || query.trim().length < 2}
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-slate-600 disabled:to-slate-600 disabled:cursor-not-allowed text-white px-8 py-3 rounded-lg font-bold transition-all duration-300 flex items-center gap-2 shadow-lg hover:scale-105 transform"
               >
                 {isSearching ? (
@@ -250,113 +172,6 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
             </div>
           )}
         </div>
-
-        {/* Quick Filters */}
-        <div className="flex flex-wrap gap-4 justify-center">
-          <button
-            onClick={() => setShowAdvanced(!showAdvanced)}
-            className={`flex items-center gap-2 px-6 py-3 rounded-lg border transition-all duration-300 ${
-              showAdvanced 
-                ? 'bg-blue-600 text-white border-blue-600 shadow-lg' 
-                : 'bg-slate-700 text-slate-300 border-slate-600 hover:border-blue-500 hover:text-white hover:bg-slate-600'
-            }`}
-          >
-            <Filter className="w-5 h-5" />
-            Advanced Filters
-          </button>
-
-          <select
-            value={filters.sortBy}
-            onChange={(e) => setFilters(prev => ({ ...prev, sortBy: e.target.value as any }))}
-            className="px-6 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500 text-lg"
-          >
-            <option value="rating">Highest Rated First</option>
-            <option value="price_low">Price: Low to High</option>
-            <option value="price_high">Price: High to Low</option>
-            <option value="reviews">Most Reviews</option>
-          </select>
-
-          <select
-            value={filters.marketplace}
-            onChange={(e) => setFilters(prev => ({ ...prev, marketplace: e.target.value }))}
-            className="px-6 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500 text-lg"
-          >
-            {marketplaces.map(marketplace => (
-              <option key={marketplace} value={marketplace === 'All Stores' ? '' : marketplace}>
-                {marketplace}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Advanced Filters */}
-        {showAdvanced && (
-          <div className="bg-slate-700/30 rounded-xl p-6 border border-slate-600/50 space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label className="block text-slate-300 text-lg mb-3 font-medium">Category</label>
-                <select
-                  value={filters.category}
-                  onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value }))}
-                  className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500 text-lg"
-                >
-                  {categories.map(category => (
-                    <option key={category} value={category === 'All Categories' ? '' : category}>
-                      {category}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-slate-300 text-lg mb-3 font-medium">
-                  Price Range: ${filters.priceRange[0]} - ${filters.priceRange[1]}
-                </label>
-                <div className="flex gap-3">
-                  <input
-                    type="number"
-                    value={filters.priceRange[0]}
-                    onChange={(e) => setFilters(prev => ({ 
-                      ...prev, 
-                      priceRange: [Number(e.target.value), prev.priceRange[1]] 
-                    }))}
-                    className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500 text-lg"
-                    placeholder="Min"
-                  />
-                  <input
-                    type="number"
-                    value={filters.priceRange[1]}
-                    onChange={(e) => setFilters(prev => ({ 
-                      ...prev, 
-                      priceRange: [prev.priceRange[0], Number(e.target.value)] 
-                    }))}
-                    className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500 text-lg"
-                    placeholder="Max"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-slate-300 text-lg mb-3 font-medium">
-                  Minimum Rating: {filters.rating}/5 ⭐
-                </label>
-                <input
-                  type="range"
-                  min="0"
-                  max="5"
-                  step="0.5"
-                  value={filters.rating}
-                  onChange={(e) => setFilters(prev => ({ ...prev, rating: Number(e.target.value) }))}
-                  className="w-full h-3 bg-slate-600 rounded-lg appearance-none cursor-pointer slider"
-                />
-                <div className="flex justify-between text-sm text-slate-400 mt-2">
-                  <span>Any</span>
-                  <span>Excellent</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Popular Searches */}
         <div>

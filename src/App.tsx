@@ -2,13 +2,12 @@ import React, { useState } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Header from './components/Header';
-import ProductSearch from './components/ProductSearch';
-import SearchResults from './components/SearchResults';
-import CommunityRecommendations from './components/CommunityRecommendations';
-import FloatingActionButton from './components/FloatingActionButton';
+import StaffPicks from './components/StaffPicks';
+import CommunitySubmissions from './components/CommunitySubmissions';
 import SubmissionForm from './components/SubmissionForm';
+import TrustBadges from './components/TrustBadges';
+import FloatingActionButton from './components/FloatingActionButton';
 import { mockProducts } from './data/mockProducts';
-import { SearchResult } from './services/productSearch';
 import { Product } from './types';
 
 const queryClient = new QueryClient({
@@ -21,44 +20,27 @@ const queryClient = new QueryClient({
 });
 
 function AppContent() {
-  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [showSubmission, setShowSubmission] = useState(false);
-  const [hasSearched, setHasSearched] = useState(false);
-
-  const handleSearchResults = (results: SearchResult[]) => {
-    setSearchResults(results);
-    setIsSearching(false);
-    setHasSearched(true);
-  };
-
-  const handleFiltersChange = (filters: any) => {
-    setSearchQuery(filters.query);
-    if (filters.query && filters.query.length > 2) {
-      setIsSearching(true);
-    } else if (!filters.query) {
-      // Clear search when query is empty
-      setSearchResults([]);
-      setHasSearched(false);
-      setIsSearching(false);
-    }
-  };
+  const [activeView, setActiveView] = useState<'staff' | 'community'>('staff');
 
   const handleSubmission = (submission: Omit<Product, 'id'>) => {
-    console.log('New submission:', submission);
+    console.log('New community submission:', submission);
     setShowSubmission(false);
   };
 
+  // Split products into staff picks and community submissions
+  const staffPicks = mockProducts.filter(p => p.status === 'approved').slice(0, 8);
+  const communitySubmissions = mockProducts.filter(p => p.status === 'approved').slice(8);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800">
       <Toaster 
         position="top-center"
         toastOptions={{
           style: {
-            background: '#1f2937',
-            color: '#f3f4f6',
-            border: '1px solid #374151'
+            background: '#1e293b',
+            color: '#f1f5f9',
+            border: '1px solid #334155'
           }
         }}
       />
@@ -67,23 +49,42 @@ function AppContent() {
         <Header />
         
         <div className="mt-12 space-y-12">
-          <ProductSearch 
-            onResults={handleSearchResults}
-            onFiltersChange={handleFiltersChange}
-          />
+          {/* Trust & Mission Section */}
+          <TrustBadges />
+          
+          {/* Navigation */}
+          <div className="flex justify-center">
+            <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-2 border border-slate-700">
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setActiveView('staff')}
+                  className={`px-8 py-4 rounded-xl font-semibold transition-all duration-300 ${
+                    activeView === 'staff'
+                      ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg'
+                      : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+                  }`}
+                >
+                  Staff Curated ({staffPicks.length})
+                </button>
+                <button
+                  onClick={() => setActiveView('community')}
+                  className={`px-8 py-4 rounded-xl font-semibold transition-all duration-300 ${
+                    activeView === 'community'
+                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg'
+                      : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+                  }`}
+                >
+                  Community Verified ({communitySubmissions.length})
+                </button>
+              </div>
+            </div>
+          </div>
 
-          {/* Show search results if we have them, otherwise show community picks */}
-          {hasSearched ? (
-            <SearchResults 
-              results={searchResults}
-              isLoading={isSearching}
-              query={searchQuery}
-            />
+          {/* Content */}
+          {activeView === 'staff' ? (
+            <StaffPicks products={staffPicks} />
           ) : (
-            <CommunityRecommendations 
-              products={mockProducts}
-              isLoading={false}
-            />
+            <CommunitySubmissions products={communitySubmissions} />
           )}
         </div>
 

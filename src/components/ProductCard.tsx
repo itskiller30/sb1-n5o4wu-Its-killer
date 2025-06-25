@@ -1,13 +1,14 @@
 import React from 'react';
-import { Star, ThumbsUp, ShoppingCart, ExternalLink, Zap } from 'lucide-react';
+import { Star, ThumbsUp, ShoppingCart, ExternalLink, Award, Shield, Users } from 'lucide-react';
 import { Product } from '../types';
 import { trackAffiliateClick, generateAffiliateLink, findBestDeal } from '../utils/affiliate';
 
 interface ProductCardProps {
   product: Product;
+  featured?: boolean;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product, featured = false }) => {
   const handlePurchaseClick = async (marketplace: string, url: string) => {
     await trackAffiliateClick(product.id, marketplace);
     const affiliateUrl = generateAffiliateLink(url, marketplace as any);
@@ -16,8 +17,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   const bestDeal = findBestDeal(product.marketplaceLinks);
 
+  const cardClasses = featured 
+    ? "group bg-gradient-to-br from-slate-800/80 via-slate-700/60 to-slate-800/80 backdrop-blur-sm rounded-2xl overflow-hidden border border-emerald-500/30 shadow-2xl"
+    : "group bg-slate-800/50 backdrop-blur-sm rounded-xl overflow-hidden border border-slate-700/50 hover:border-slate-600/70 transition-all duration-300 hover:shadow-xl";
+
   return (
-    <div className="group bg-gray-800/50 backdrop-blur-sm rounded-xl overflow-hidden border border-gray-700 hover:border-gray-600 transition-all duration-300 hover:shadow-xl">
+    <div className={cardClasses}>
       {/* Image */}
       <div className="relative h-48 overflow-hidden">
         <img
@@ -25,29 +30,42 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           alt={product.name}
           className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent opacity-60"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60"></div>
         
-        {/* Rating Badge */}
-        <div className="absolute top-3 right-3 bg-yellow-500 text-gray-900 px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1">
-          <Zap className="w-4 h-4" />
-          {product.rating.toFixed(1)}
+        {/* Badges */}
+        <div className="absolute top-3 right-3 flex flex-col gap-2">
+          <div className="bg-emerald-500/90 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+            <Star className="w-3 h-3" />
+            {product.rating.toFixed(1)}
+          </div>
+          {featured && (
+            <div className="bg-yellow-500/90 backdrop-blur-sm text-slate-900 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+              <Award className="w-3 h-3" />
+              Featured
+            </div>
+          )}
         </div>
 
-        {/* Best Price Badge */}
-        {bestDeal && (
-          <div className="absolute top-3 left-3 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-bold">
-            Best Price
+        <div className="absolute top-3 left-3 flex flex-col gap-2">
+          <div className="bg-slate-900/80 backdrop-blur-sm text-emerald-400 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+            <Shield className="w-3 h-3" />
+            Staff Verified
           </div>
-        )}
+          {bestDeal && (
+            <div className="bg-green-500/90 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-bold">
+              Best Price
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Content */}
       <div className="p-5">
-        <h3 className="text-lg font-bold text-white mb-2 line-clamp-2 group-hover:text-blue-400 transition-colors">
+        <h3 className={`font-bold text-white mb-2 line-clamp-2 group-hover:text-emerald-400 transition-colors ${featured ? 'text-xl' : 'text-lg'}`}>
           {product.name}
         </h3>
 
-        <p className="text-gray-400 text-sm mb-4 line-clamp-2">
+        <p className="text-slate-400 text-sm mb-4 line-clamp-2">
           {product.description}
         </p>
 
@@ -63,14 +81,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 </div>
               </div>
             ) : (
-              <span className="text-xl font-bold text-blue-400">
+              <span className="text-xl font-bold text-emerald-400">
                 ${product.price.toLocaleString()}
               </span>
             )}
           </div>
           
-          <div className="flex items-center gap-1 text-gray-400">
-            <ThumbsUp className="w-4 h-4" />
+          <div className="flex items-center gap-1 text-slate-400">
+            <Users className="w-4 h-4" />
             <span className="text-sm">{product.reviews.toLocaleString()}</span>
           </div>
         </div>
@@ -80,19 +98,19 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           {product.tags.slice(0, 3).map((tag) => (
             <span
               key={tag}
-              className="px-2 py-1 bg-gray-700 text-gray-300 rounded-full text-xs"
+              className="px-2 py-1 bg-slate-700/50 text-slate-300 rounded-full text-xs border border-slate-600/30"
             >
               {tag}
             </span>
           ))}
         </div>
 
-        {/* Purchase Button */}
+        {/* Purchase Options */}
         <div className="space-y-2">
           {bestDeal ? (
             <button
               onClick={() => handlePurchaseClick(bestDeal.marketplace, product.marketplaceLinks[bestDeal.marketplace] || '')}
-              className="w-full py-3 px-4 rounded-lg bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold transition-all duration-300 flex items-center justify-center gap-2"
+              className="w-full py-3 px-4 rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold transition-all duration-300 flex items-center justify-center gap-2 shadow-lg"
             >
               <ShoppingCart className="w-4 h-4" />
               Best Price: ${bestDeal.price}
@@ -100,7 +118,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           ) : (
             <button
               onClick={() => handlePurchaseClick('amazon', product.marketplaceLinks.amazon || '')}
-              className="w-full py-3 px-4 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold transition-all duration-300 flex items-center justify-center gap-2"
+              className="w-full py-3 px-4 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold transition-all duration-300 flex items-center justify-center gap-2 shadow-lg"
             >
               <ShoppingCart className="w-4 h-4" />
               Buy Now - ${product.price.toLocaleString()}
@@ -116,7 +134,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               <button
                 key={marketplace}
                 onClick={() => handlePurchaseClick(marketplace, url)}
-                className="py-2 px-3 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white border border-gray-600 hover:border-gray-500 transition-all duration-300 flex items-center justify-center gap-1 text-sm"
+                className="py-2 px-3 rounded-lg bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 hover:text-white border border-slate-600/30 hover:border-slate-500/50 transition-all duration-300 flex items-center justify-center gap-1 text-sm"
               >
                 <ExternalLink className="w-3 h-3" />
                 {marketplace.charAt(0).toUpperCase() + marketplace.slice(1)}
@@ -124,9 +142,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             ))}
           </div>
 
-          <p className="text-xs text-gray-500 text-center">
-            Affiliate links • No extra cost to you
-          </p>
+          <div className="text-center">
+            <p className="text-xs text-slate-500">
+              Trusted affiliate partners • No extra cost to you
+            </p>
+          </div>
         </div>
       </div>
     </div>

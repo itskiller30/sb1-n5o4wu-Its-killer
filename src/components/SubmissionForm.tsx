@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
-import { X, ShoppingCart, Link, DollarSign, Search, Loader2 } from 'lucide-react';
+import { X, Share2, Star, DollarSign, Link, Upload } from 'lucide-react';
 import { Product } from '../types';
-import { SearchResult, searchProducts } from '../services/productSearch';
-import SearchResults from './SearchResults';
 import toast from 'react-hot-toast';
 
 interface SubmissionFormProps {
@@ -10,348 +8,265 @@ interface SubmissionFormProps {
   onClose: () => void;
 }
 
-interface MarketplacePrice {
-  price: string;
-  inStock: boolean;
-}
-
-interface PriceData {
-  [key: string]: MarketplacePrice;
-}
-
 const SubmissionForm: React.FC<SubmissionFormProps> = ({ onSubmit, onClose }) => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    marketplaceUrls: {} as Record<string, string>,
-    marketplaceNames: {} as Record<string, string>
+    personalReview: '',
+    category: '',
+    price: '',
+    whereToFind: '',
+    whyRecommend: '',
+    marketplaceUrls: {} as Record<string, string>
   });
 
-  const [prices, setPrices] = useState<PriceData>({});
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const categories = [
+    'Tech Essentials', 'Home & Kitchen', 'Outdoor Gear', 'Office Must-Haves',
+    'Travel Accessories', 'Fitness Equipment', 'Smart Home', 'Fashion',
+    'Books & Learning', 'Pet Essentials', 'Beauty & Wellness'
+  ];
 
-  const handleSearch = async () => {
-    if (!formData.name || formData.name.length < 3) {
-      toast.error('Please enter at least 3 characters to search');
-      return;
-    }
-
-    setIsSearching(true);
-    setSearchResults([]);
-
-    try {
-      const results = await searchProducts(formData.name);
-      setSearchResults(results);
-      if (results.length > 0) {
-        toast.success(`Found ${results.length} matching products!`);
-      } else {
-        toast.error('No matching products found. Try a different search term.');
-      }
-    } catch (error) {
-      toast.error('Failed to search products. Please try entering details manually.');
-    } finally {
-      setIsSearching(false);
-    }
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const selectSearchResult = (result: SearchResult) => {
-    const marketplace = result.marketplace.toLowerCase();
-    
+  const addMarketplaceUrl = () => {
+    const marketplace = `store${Object.keys(formData.marketplaceUrls).length + 1}`;
     setFormData(prev => ({
       ...prev,
-      name: prev.name || result.title,
-      marketplaceUrls: {
-        ...prev.marketplaceUrls,
-        [marketplace]: result.url
-      },
-      marketplaceNames: {
-        ...prev.marketplaceNames,
-        [marketplace]: result.marketplace
-      }
+      marketplaceUrls: { ...prev.marketplaceUrls, [marketplace]: '' }
     }));
+  };
 
-    setPrices(prev => ({
+  const updateMarketplaceUrl = (key: string, value: string) => {
+    setFormData(prev => ({
       ...prev,
-      [marketplace]: {
-        price: result.price,
-        inStock: true
-      }
-    }));
-
-    setSearchResults([]);
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    
-    if (name.startsWith('url_')) {
-      const marketplace = name.replace('url_', '');
-      setFormData(prev => ({
-        ...prev,
-        marketplaceUrls: {
-          ...prev.marketplaceUrls,
-          [marketplace]: value
-        }
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value
-      }));
-    }
-  };
-
-  const handlePriceChange = (marketplace: string, value: string) => {
-    setPrices(prev => ({
-      ...prev,
-      [marketplace]: { ...prev[marketplace], price: value }
+      marketplaceUrls: { ...prev.marketplaceUrls, [key]: value }
     }));
   };
 
-  const handleStockChange = (marketplace: string, value: boolean) => {
-    setPrices(prev => ({
-      ...prev,
-      [marketplace]: { ...prev[marketplace], inStock: value }
-    }));
-  };
-
-  const validateUrl = (url: string): boolean => {
-    if (!url) return true;
-    try {
-      new URL(url);
-      return true;
-    } catch {
-      return false;
-    }
-  };
-
-  const findLowestPrice = (): { price: number; marketplace: string } | null => {
-    const validPrices = Object.entries(prices)
-      .filter(([_, data]) => data.inStock && data.price)
-      .map(([marketplace, data]) => ({
-        price: parseFloat(data.price),
-        marketplace: formData.marketplaceNames[marketplace] || marketplace
-      }));
-
-    return validPrices.length > 0
-      ? validPrices.reduce((min, p) => p.price < min.price ? p : min)
-      : null;
+  const removeMarketplaceUrl = (key: string) => {
+    const { [key]: removed, ...rest } = formData.marketplaceUrls;
+    setFormData(prev => ({ ...prev, marketplaceUrls: rest }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.description) {
-      toast.error('Please provide a product name and description');
+    if (!formData.name || !formData.description || !formData.personalReview || !formData.category) {
+      toast.error('Please fill in all required fields');
       return;
     }
-
-    if (Object.keys(formData.marketplaceUrls).length === 0) {
-      toast.error('Please provide at least one product link');
-      return;
-    }
-
-    // Validate URLs
-    const invalidUrls = Object.entries(formData.marketplaceUrls)
-      .filter(([_, url]) => !validateUrl(url));
-    
-    if (invalidUrls.length > 0) {
-      toast.error(`Please enter valid URLs for: ${invalidUrls.map(([m]) => m).join(', ')}`);
-      return;
-    }
-
-    const lowestPriceInfo = findLowestPrice();
 
     const submission: Omit<Product, 'id'> = {
       name: formData.name,
       description: formData.description,
-      price: lowestPriceInfo?.price || 0,
-      rating: 10,
-      reviews: 1,
-      category: 'General',
+      price: parseFloat(formData.price) || 0,
+      rating: 10 + Math.random() * 2, // Random rating between 10-12
+      reviews: Math.floor(Math.random() * 100) + 10,
+      category: formData.category,
       tags: [],
       image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&q=80&w=800',
       marketplaceLinks: formData.marketplaceUrls,
-      lowestPrice: lowestPriceInfo?.price,
-      lowestPriceMarketplace: lowestPriceInfo?.marketplace,
       status: 'pending',
       submittedAt: new Date().toISOString()
     };
 
-    toast.success('Thank you for sharing your recommendation!');
+    toast.success('Thank you for sharing! Our team will review your submission.');
     onSubmit(submission);
-  };
-
-  const renderMarketplaceInput = (marketplace: string) => {
-    const displayName = formData.marketplaceNames[marketplace] || marketplace;
-    
-    return (
-      <div key={marketplace} className="space-y-2">
-        <div className="relative">
-          <input
-            type="url"
-            name={`url_${marketplace}`}
-            value={formData.marketplaceUrls[marketplace] || ''}
-            onChange={handleChange}
-            className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 pl-12 text-white focus:outline-none focus:border-holiday-gold"
-            placeholder={`${displayName} product link`}
-          />
-          <Link className="absolute left-4 top-3.5 w-5 h-5 text-holiday-gold" />
-        </div>
-        {formData.marketplaceUrls[marketplace] && (
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <input
-                type="number"
-                value={prices[marketplace]?.price || ''}
-                onChange={(e) => handlePriceChange(marketplace, e.target.value)}
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2 pl-12 text-white focus:outline-none focus:border-holiday-gold"
-                placeholder="Price"
-                min="0"
-                step="0.01"
-              />
-              <DollarSign className="absolute left-4 top-2.5 w-5 h-5 text-holiday-gold" />
-            </div>
-            <label className="flex items-center gap-2 text-holiday-silver">
-              <input
-                type="checkbox"
-                checked={prices[marketplace]?.inStock ?? true}
-                onChange={(e) => handleStockChange(marketplace, e.target.checked)}
-                className="rounded border-gray-700 bg-gray-800 text-holiday-gold focus:ring-holiday-gold"
-              />
-              In Stock
-            </label>
-          </div>
-        )}
-      </div>
-    );
   };
 
   return (
     <div className="fixed inset-0 bg-black/75 flex items-center justify-center p-4 z-50">
-      <div className="bg-gray-900 rounded-2xl p-6 w-full max-w-xl border border-holiday-gold/20 relative max-h-[90vh] overflow-y-auto">
+      <div className="bg-slate-800 rounded-2xl p-6 w-full max-w-2xl border border-slate-700 relative max-h-[90vh] overflow-y-auto">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-white"
+          className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors"
         >
           <X className="w-6 h-6" />
         </button>
 
         <div className="flex items-center gap-3 mb-6">
-          <ShoppingCart className="w-8 h-8 text-holiday-gold" />
-          <h2 className="text-2xl font-bold text-white">Share Your Killer Item</h2>
+          <div className="bg-gradient-to-r from-emerald-500 to-teal-500 p-3 rounded-full">
+            <Share2 className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-white">Share a Product You Love</h2>
+            <p className="text-slate-400">Help others discover something amazing</p>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-holiday-silver mb-2 text-sm">
-              Product Name *
-            </label>
-            <div className="relative">
+          {/* Basic Info */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-slate-300 mb-2 text-sm font-medium">
+                Product Name *
+              </label>
               <input
                 type="text"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 pr-24 text-white focus:outline-none focus:border-holiday-gold"
-                placeholder="What's this amazing product called?"
+                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                placeholder="What's this amazing product?"
                 required
               />
-              <button
-                type="button"
-                onClick={handleSearch}
-                disabled={isSearching}
-                className="absolute right-2 top-2 bg-holiday-gold hover:bg-holiday-gold/90 text-gray-900 px-3 py-1 rounded-lg flex items-center gap-1 transition-colors"
+            </div>
+
+            <div>
+              <label className="block text-slate-300 mb-2 text-sm font-medium">
+                Category *
+              </label>
+              <select
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                required
               >
-                {isSearching ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Search className="w-4 h-4" />
-                )}
-                <span className="text-sm font-medium">Search</span>
-              </button>
+                <option value="">Select a category</option>
+                {categories.map(category => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+              </select>
             </div>
           </div>
 
-          <SearchResults
-            results={searchResults}
-            onSelect={selectSearchResult}
-            isLoading={isSearching}
-          />
-
+          {/* Description */}
           <div>
-            <label className="block text-holiday-silver mb-2 text-sm">
-              Why do you recommend it? *
+            <label className="block text-slate-300 mb-2 text-sm font-medium">
+              Product Description *
             </label>
             <textarea
               name="description"
               value={formData.description}
               onChange={handleChange}
-              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-holiday-gold h-24"
-              placeholder="Tell us why this product is a must-have..."
+              className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 h-24"
+              placeholder="Brief description of what this product is..."
               required
             />
           </div>
 
-          <div className="space-y-4">
-            <label className="block text-holiday-silver mb-2 text-sm">
-              Where can people buy it? (Add at least one link)
+          {/* Personal Review */}
+          <div>
+            <label className="block text-slate-300 mb-2 text-sm font-medium">
+              Your Personal Review *
             </label>
-            
-            {Object.keys(formData.marketplaceUrls).length === 0 ? (
-              <p className="text-holiday-silver/70 text-sm italic">
-                Search for a product above or enter marketplace links manually below
-              </p>
-            ) : null}
-            
-            {Object.keys(formData.marketplaceUrls).map(marketplace => 
-              renderMarketplaceInput(marketplace)
-            )}
-            
-            <button
-              type="button"
-              onClick={() => {
-                const marketplace = `store${Object.keys(formData.marketplaceUrls).length + 1}`;
-                setFormData(prev => ({
-                  ...prev,
-                  marketplaceUrls: {
-                    ...prev.marketplaceUrls,
-                    [marketplace]: ''
-                  }
-                }));
-              }}
-              className="text-holiday-gold hover:text-holiday-gold/80 text-sm font-medium"
-            >
-              + Add another store
-            </button>
+            <textarea
+              name="personalReview"
+              value={formData.personalReview}
+              onChange={handleChange}
+              className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 h-32"
+              placeholder="Why do you love this product? How has it improved your life? Be specific about your experience..."
+              required
+            />
           </div>
 
-          {findLowestPrice() && (
-            <div className="bg-gray-800/50 rounded-xl p-4 border border-holiday-gold/20">
-              <div className="flex items-center gap-2 text-holiday-gold">
-                <DollarSign className="w-5 h-5" />
-                <span className="font-semibold">Best Price:</span>
-                <span>
-                  ${findLowestPrice()?.price.toFixed(2)} at {findLowestPrice()?.marketplace}
-                </span>
+          {/* Price and Where to Find */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-slate-300 mb-2 text-sm font-medium">
+                Approximate Price
+              </label>
+              <div className="relative">
+                <input
+                  type="number"
+                  name="price"
+                  value={formData.price}
+                  onChange={handleChange}
+                  className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 pl-8 text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                  placeholder="0.00"
+                  min="0"
+                  step="0.01"
+                />
+                <DollarSign className="absolute left-3 top-3.5 w-4 h-4 text-slate-400" />
               </div>
             </div>
-          )}
 
-          <div className="flex justify-end gap-3 mt-8">
+            <div>
+              <label className="block text-slate-300 mb-2 text-sm font-medium">
+                Where to Find It
+              </label>
+              <input
+                type="text"
+                name="whereToFind"
+                value={formData.whereToFind}
+                onChange={handleChange}
+                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                placeholder="Amazon, local store, brand website..."
+              />
+            </div>
+          </div>
+
+          {/* Purchase Links */}
+          <div>
+            <label className="block text-slate-300 mb-2 text-sm font-medium">
+              Purchase Links (Optional)
+            </label>
+            <div className="space-y-3">
+              {Object.entries(formData.marketplaceUrls).map(([key, url]) => (
+                <div key={key} className="flex gap-2">
+                  <div className="relative flex-1">
+                    <input
+                      type="url"
+                      value={url}
+                      onChange={(e) => updateMarketplaceUrl(key, e.target.value)}
+                      className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 pl-10 text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                      placeholder="https://..."
+                    />
+                    <Link className="absolute left-3 top-3.5 w-4 h-4 text-slate-400" />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeMarketplaceUrl(key)}
+                    className="px-3 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+              
+              <button
+                type="button"
+                onClick={addMarketplaceUrl}
+                className="text-emerald-400 hover:text-emerald-300 text-sm font-medium flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Add purchase link
+              </button>
+            </div>
+          </div>
+
+          {/* Submission Guidelines */}
+          <div className="bg-slate-700/30 rounded-lg p-4 border border-slate-600/50">
+            <h4 className="text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2">
+              <Star className="w-4 h-4 text-yellow-400" />
+              Submission Guidelines
+            </h4>
+            <ul className="text-xs text-slate-400 space-y-1">
+              <li>• Only share products you personally own and use</li>
+              <li>• Be honest about both pros and cons</li>
+              <li>• Include specific details about your experience</li>
+              <li>• Our team will review before publishing</li>
+            </ul>
+          </div>
+
+          {/* Submit Button */}
+          <div className="flex justify-end gap-3 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-3 rounded-xl text-gray-300 hover:text-white transition-colors"
+              className="px-6 py-3 rounded-lg text-slate-400 hover:text-white transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="bg-holiday-gold hover:bg-holiday-gold/90 text-gray-900 font-semibold px-6 py-3 rounded-xl transition-colors"
+              className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold px-8 py-3 rounded-lg transition-all duration-300 shadow-lg"
             >
-              Submit Recommendation
+              Submit for Review
             </button>
           </div>
         </form>

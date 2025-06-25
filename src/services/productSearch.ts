@@ -15,7 +15,7 @@ export interface SearchResult {
 
 const MARKETPLACES = [
   'Amazon', 'eBay', 'Walmart', 'Target', 'Best Buy',
-  'Home Depot', 'Costco', 'Newegg', 'B&H Photo', 'Etsy'
+  'Home Depot', 'Costco', 'Newegg', 'B&H Photo'
 ] as const;
 
 export type Marketplace = typeof MARKETPLACES[number];
@@ -97,12 +97,11 @@ const SAMPLE_PRODUCTS: Record<string, Partial<SearchResult>[]> = {
 // Enhanced search simulation with more realistic data
 const searchMarketplace = async (query: string, marketplace: Marketplace): Promise<SearchResult[]> => {
   // Simulate realistic network latency
-  await new Promise(resolve => setTimeout(resolve, Math.random() * 500 + 200));
+  await new Promise(resolve => setTimeout(resolve, Math.random() * 300 + 100));
 
-  console.log(`Searching ${marketplace} for: ${query}`);
+  const queryLower = query.toLowerCase().trim();
+  if (!queryLower) return [];
 
-  // Find matching products based on query
-  const queryLower = query.toLowerCase();
   let matchingProducts: Partial<SearchResult>[] = [];
 
   // Check for exact matches in sample data
@@ -129,8 +128,7 @@ const searchMarketplace = async (query: string, marketplace: Marketplace): Promi
     const basePrice = 50 + Math.random() * 200;
     matchingProducts = [
       { title: `${query} - Premium Model`, price: basePrice * 1.5, rating: 4.3, reviews: 1250 },
-      { title: `${query} - Professional Grade`, price: basePrice * 2, rating: 4.5, reviews: 890 },
-      { title: `${query} - Budget Option`, price: basePrice * 0.7, rating: 4.1, reviews: 2340 }
+      { title: `${query} - Professional Grade`, price: basePrice * 2, rating: 4.5, reviews: 890 }
     ];
   }
 
@@ -144,12 +142,11 @@ const searchMarketplace = async (query: string, marketplace: Marketplace): Promi
     'Home Depot': 0.95 + (Math.random() * 0.2), // 95-115%
     'Costco': 0.9 + (Math.random() * 0.15), // 90-105%
     'Newegg': 0.95 + (Math.random() * 0.2), // 95-115%
-    'B&H Photo': 1.0 + (Math.random() * 0.15), // 100-115%
-    'Etsy': 1.2 + (Math.random() * 0.4) // 120-160% (handmade premium)
+    'B&H Photo': 1.0 + (Math.random() * 0.15) // 100-115%
   };
 
-  // Select 1-3 products from matching products for this marketplace
-  const numResults = Math.min(matchingProducts.length, Math.floor(Math.random() * 3) + 1);
+  // Select 1-2 products from matching products for this marketplace
+  const numResults = Math.min(matchingProducts.length, Math.floor(Math.random() * 2) + 1);
   const selectedProducts = matchingProducts
     .sort(() => Math.random() - 0.5) // Shuffle
     .slice(0, numResults);
@@ -184,8 +181,7 @@ const generateProductUrl = (marketplace: string, query: string, index: number): 
     'Home Depot': 'https://homedepot.com/p/',
     'Costco': 'https://costco.com/product/',
     'Newegg': 'https://newegg.com/p/',
-    'B&H Photo': 'https://bhphotovideo.com/c/product/',
-    'Etsy': 'https://etsy.com/listing/'
+    'B&H Photo': 'https://bhphotovideo.com/c/product/'
   };
 
   const baseUrl = baseUrls[marketplace] || 'https://example.com/product/';
@@ -256,8 +252,7 @@ const getShippingInfo = (marketplace: string): string => {
     'Home Depot': ['Free shipping $45+', 'Store pickup', 'Truck delivery available'],
     'Costco': ['Free shipping for members', 'White glove delivery', '2-day delivery'],
     'Newegg': ['Free shipping available', 'Newegg Premier', 'Express shipping'],
-    'B&H Photo': ['Free expedited shipping', 'Professional support', 'B&H Payboo Card'],
-    'Etsy': ['Varies by seller', 'Handmade items', 'Custom shipping options']
+    'B&H Photo': ['Free expedited shipping', 'Professional support', 'B&H Payboo Card']
   };
 
   const options = shippingOptions[marketplace] || ['Standard shipping'];
@@ -265,40 +260,52 @@ const getShippingInfo = (marketplace: string): string => {
 };
 
 export const searchProducts = async (query: string): Promise<SearchResult[]> => {
-  if (!query || query.length < 2) {
-    console.log('Query too short:', query);
+  // Input validation
+  if (!query || typeof query !== 'string') {
+    console.warn('Invalid query provided:', query);
+    return [];
+  }
+
+  const trimmedQuery = query.trim();
+  if (trimmedQuery.length < 2) {
     toast.error('Please enter at least 2 characters to search');
     return [];
   }
 
-  console.log('Starting product search for:', query);
+  console.log('🔍 Starting product search for:', trimmedQuery);
 
   try {
-    // Search all marketplaces in parallel
-    const searchPromises = MARKETPLACES.map(marketplace => 
-      searchMarketplace(query, marketplace)
-        .catch((error) => {
-          console.warn(`Search failed for ${marketplace}:`, error);
-          return [] as SearchResult[];
-        })
-    );
+    // Search all marketplaces in parallel with error handling
+    const searchPromises = MARKETPLACES.map(async (marketplace) => {
+      try {
+        return await searchMarketplace(trimmedQuery, marketplace);
+      } catch (error) {
+        console.warn(`❌ Search failed for ${marketplace}:`, error);
+        return [] as SearchResult[];
+      }
+    });
 
-    console.log('Waiting for search results from all marketplaces...');
+    console.log('⏳ Waiting for search results from all marketplaces...');
     const results = await Promise.all(searchPromises);
     const flatResults = results.flat();
 
-    console.log('Raw results count:', flatResults.length);
+    console.log('📊 Raw results count:', flatResults.length);
+
+    if (flatResults.length === 0) {
+      toast.error(`No results found for "${trimmedQuery}". Try different keywords.`);
+      return [];
+    }
 
     // Remove duplicates based on title similarity
     const uniqueResults = flatResults.filter((result, index, self) => {
-      const titleWords = result.title.toLowerCase().split(' ').slice(0, 3).join(' ');
+      const titleWords = result.title.toLowerCase().split(' ').slice(0, 4).join(' ');
       return index === self.findIndex(r => {
-        const rTitleWords = r.title.toLowerCase().split(' ').slice(0, 3).join(' ');
+        const rTitleWords = r.title.toLowerCase().split(' ').slice(0, 4).join(' ');
         return rTitleWords === titleWords && r.marketplace === result.marketplace;
       });
     });
 
-    console.log('Unique results count:', uniqueResults.length);
+    console.log('✨ Unique results count:', uniqueResults.length);
 
     // Sort by a combination of rating, reviews, and price (value score)
     const sortedResults = uniqueResults.sort((a, b) => {
@@ -307,20 +314,18 @@ export const searchProducts = async (query: string): Promise<SearchResult[]> => 
       return scoreB - scoreA;
     });
 
-    // Limit to top 24 results for better performance
-    const finalResults = sortedResults.slice(0, 24);
+    // Limit to top 20 results for better performance
+    const finalResults = sortedResults.slice(0, 20);
     
-    console.log('Final results count:', finalResults.length);
+    console.log('🎯 Final results count:', finalResults.length);
     
-    if (finalResults.length === 0) {
-      toast.error(`No results found for "${query}". Try different keywords.`);
-    } else {
+    if (finalResults.length > 0) {
       toast.success(`Found ${finalResults.length} products across all retailers!`);
     }
     
     return finalResults;
   } catch (error) {
-    console.error('Search failed:', error);
+    console.error('💥 Search failed:', error);
     toast.error('Search service temporarily unavailable. Please try again.');
     return [];
   }

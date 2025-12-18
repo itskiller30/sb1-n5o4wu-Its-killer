@@ -9,8 +9,10 @@ import CommunityRecommendations from './components/CommunityRecommendations';
 import SubmissionForm from './components/SubmissionForm';
 import FloatingActionButton from './components/FloatingActionButton';
 import { SearchResult } from './services/productSearch';
-import { mockProducts } from './data/mockProducts';
 import { Product } from './types';
+import { useProducts } from './hooks/useProducts';
+import { submitProduct } from './services/products';
+import toast from 'react-hot-toast';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,6 +31,8 @@ function AppContent() {
   const [showSubmission, setShowSubmission] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
+  const { products, isLoading: isLoadingProducts } = useProducts('rating', 'Community');
+
   const handleSearchResults = (results: SearchResult[]) => {
     setSearchResults(results);
     setIsSearching(false);
@@ -44,10 +48,17 @@ function AppContent() {
     }
   };
 
-  const handleSubmission = (submission: Omit<Product, 'id'>) => {
-    console.log('New community submission:', submission);
-    setHasSubmitted(true);
-    setShowSubmission(false);
+  const handleSubmission = async (submission: Omit<Product, 'id'>) => {
+    try {
+      await submitProduct(submission);
+      toast.success('Product submitted successfully! It will appear after approval.');
+      setHasSubmitted(true);
+      setShowSubmission(false);
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+    } catch (error) {
+      console.error('Failed to submit product:', error);
+      toast.error('Failed to submit product. Please try again.');
+    }
   };
 
   return (
@@ -159,8 +170,8 @@ function AppContent() {
               </div>
 
               <CommunityRecommendations
-                products={mockProducts}
-                isLoading={false}
+                products={products}
+                isLoading={isLoadingProducts}
               />
             </div>
           )}

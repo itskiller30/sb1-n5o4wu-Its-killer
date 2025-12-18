@@ -89,30 +89,44 @@ const generateProduct = (index: number): Omit<Product, 'id'> => {
 
 // Seed the database with products
 export const seedProducts = async (count: number = 1000) => {
-  const batchSize = 50; // Insert in batches to avoid timeouts
+  const batchSize = 50;
   const batches = Math.ceil(count / batchSize);
-  
+
   console.log(`Starting to seed ${count} products...`);
-  
+
   for (let i = 0; i < batches; i++) {
     const start = i * batchSize;
     const end = Math.min(start + batchSize, count);
-    const products = Array.from({ length: end - start }, (_, index) => 
-      generateProduct(start + index + 1)
-    );
-    
+    const products = Array.from({ length: end - start }, (_, index) => {
+      const product = generateProduct(start + index + 1);
+      return {
+        name: product.name,
+        description: product.description,
+        rating: product.rating,
+        reviews: product.reviews,
+        price: product.price,
+        image: product.image,
+        category: product.category,
+        tags: product.tags,
+        marketplace_links: product.marketplaceLinks,
+        status: 'approved',
+        submitted_at: product.submittedAt,
+        approved_at: product.approvedAt
+      };
+    });
+
     const { error } = await supabase
       .from('products')
       .insert(products);
-    
+
     if (error) {
       console.error(`Error seeding batch ${i + 1}:`, error);
       throw error;
     }
-    
+
     console.log(`Seeded batch ${i + 1} of ${batches} (${end} products)`);
   }
-  
+
   console.log(`Successfully seeded ${count} products!`);
 };
 

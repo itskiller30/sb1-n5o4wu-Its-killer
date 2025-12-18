@@ -32,8 +32,28 @@ export const fetchProducts = async (
     throw error;
   }
 
+  const products = data?.map((item: any) => ({
+    id: item.id,
+    name: item.name,
+    description: item.description,
+    rating: item.rating,
+    reviews: item.reviews,
+    price: item.price,
+    image: item.image,
+    category: item.category,
+    tags: item.tags || [],
+    marketplaceLinks: item.marketplace_links || {},
+    affiliateLinks: item.affiliate_links || {},
+    lowestPrice: item.lowest_price,
+    lowestPriceMarketplace: item.lowest_price_marketplace,
+    status: item.status,
+    submittedAt: item.submitted_at,
+    approvedAt: item.approved_at,
+    moderationNote: item.moderation_note
+  })) || [];
+
   return {
-    products: data as Product[],
+    products: products as Product[],
     total: count || 0
   };
 };
@@ -45,9 +65,22 @@ export const submitProduct = async (product: Omit<Product, 'id'>) => {
     .from('products')
     .insert([
       {
-        ...product,
+        name: product.name,
+        description: product.description,
+        rating: product.rating,
+        reviews: product.reviews,
+        price: product.price,
+        image: product.image,
+        category: product.category,
+        tags: product.tags,
+        marketplace_links: product.marketplaceLinks,
         affiliate_links: affiliateLinks,
-        created_at: new Date().toISOString()
+        lowest_price: product.lowestPrice,
+        lowest_price_marketplace: product.lowestPriceMarketplace,
+        status: 'pending',
+        submitted_at: product.submittedAt,
+        approved_at: product.approvedAt,
+        moderation_note: product.moderationNote
       }
     ])
     .select()
@@ -57,5 +90,5 @@ export const submitProduct = async (product: Omit<Product, 'id'>) => {
     throw error;
   }
 
-  return data as Product;
+  return data as any;
 };

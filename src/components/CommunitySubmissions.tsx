@@ -29,7 +29,15 @@ const CommunitySubmissions: React.FC<CommunitySubmissionsProps> = ({ products })
     });
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 relative">
+      <div className="absolute inset-0 -z-10 overflow-hidden rounded-3xl opacity-5">
+        <img
+          src="https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1600&auto=format&fit=crop&q=80"
+          alt="Community background"
+          className="w-full h-full object-cover blur-md scale-105"
+        />
+      </div>
+
       {/* Header */}
       <div className="text-center space-y-6">
         <div className="flex items-center justify-center gap-3">
@@ -37,7 +45,7 @@ const CommunitySubmissions: React.FC<CommunitySubmissionsProps> = ({ products })
           <h2 className="text-3xl font-bold text-white">Community Verified</h2>
         </div>
         <p className="text-slate-400 max-w-2xl mx-auto">
-          Products shared by our trusted community members and verified through real-world testing. 
+          Products shared by our trusted community members and verified through real-world testing.
           Each recommendation comes with honest reviews from people who actually use these products.
         </p>
       </div>

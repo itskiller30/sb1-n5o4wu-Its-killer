@@ -52,7 +52,15 @@ const CommunityRecommendations: React.FC<CommunityRecommendationsProps> = ({ pro
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 relative">
+      <div className="absolute inset-0 -z-10 overflow-hidden rounded-3xl opacity-5">
+        <img
+          src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1600&auto=format&fit=crop&q=80"
+          alt="Community background"
+          className="w-full h-full object-cover blur-md scale-105"
+        />
+      </div>
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">

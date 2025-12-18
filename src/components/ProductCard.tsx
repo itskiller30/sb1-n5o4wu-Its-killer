@@ -17,112 +17,103 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, featured = false }) 
 
   const bestDeal = findBestDeal(product.marketplaceLinks);
 
-  const cardClasses = featured 
-    ? "group bg-gradient-to-br from-slate-800/90 via-slate-700/70 to-slate-800/90 backdrop-blur-sm rounded-2xl overflow-hidden border border-emerald-500/40 shadow-2xl hover:border-emerald-400/60 transition-all duration-300"
-    : "group bg-slate-800/60 backdrop-blur-sm rounded-xl overflow-hidden border border-slate-700/50 hover:border-emerald-500/40 transition-all duration-300 hover:shadow-xl hover:scale-[1.02]";
+  const cardClasses = featured
+    ? "group bg-white/10 border border-orange-500/50 rounded-lg overflow-hidden hover:border-orange-500 transition-all"
+    : "group bg-white/5 border border-white/10 rounded-lg overflow-hidden hover:border-white/20 transition-all";
 
   return (
     <div className={cardClasses}>
-      {/* Image */}
-      <div className="relative h-48 overflow-hidden">
+      <div className="relative h-48 overflow-hidden bg-slate-800">
         <img
           src={product.image}
           alt={product.name}
-          className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
+          className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60"></div>
-        
-        {/* Badges */}
+
         <div className="absolute top-3 right-3 flex flex-col gap-2">
-          <div className="bg-gradient-to-r from-emerald-500/90 to-teal-500/90 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
-            <Zap className="w-3 h-3" />
+          <div className="bg-green-500 text-white px-2 py-1 rounded text-xs font-semibold flex items-center gap-1">
+            <Star className="w-3 h-3 fill-white" />
             {product.rating.toFixed(1)}
           </div>
           {featured && (
-            <div className="bg-gradient-to-r from-yellow-500/90 to-orange-500/90 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
-              <Award className="w-3 h-3" />
+            <div className="bg-orange-500 text-white px-2 py-1 rounded text-xs font-semibold">
               Featured
             </div>
           )}
         </div>
 
-        <div className="absolute top-3 left-3 flex flex-col gap-2">
-          {bestDeal && (
-            <div className="bg-green-500/90 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+        {bestDeal && (
+          <div className="absolute top-3 left-3">
+            <div className="bg-blue-500 text-white px-2 py-1 rounded text-xs font-semibold">
               Best Price
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
-      {/* Content */}
-      <div className="p-5">
-        <h3 className={`font-bold text-white mb-2 line-clamp-2 group-hover:text-emerald-400 transition-colors ${featured ? 'text-xl' : 'text-lg'}`}>
+      <div className="p-4">
+        <h3 className={`font-bold text-white mb-2 line-clamp-2 ${featured ? 'text-lg' : 'text-base'}`}>
           {product.name}
         </h3>
 
-        <p className="text-slate-400 text-sm mb-4 line-clamp-2 group-hover:text-slate-300 transition-colors">
+        <p className="text-slate-400 text-sm mb-3 line-clamp-2">
           {product.description}
         </p>
 
-        <div className="flex items-center justify-between mb-4">
-          <div className="space-y-1">
+        <div className="flex items-center justify-between mb-3">
+          <div>
             {bestDeal ? (
               <div>
-                <span className="text-xl font-bold text-green-400">
+                <span className="text-xl font-bold text-white">
                   ${bestDeal.price.toLocaleString()}
                 </span>
-                <div className="text-xs text-green-400 flex items-center gap-1">
-                  <Star className="w-3 h-3" />
-                  Best at {bestDeal.marketplace}
+                <div className="text-xs text-slate-400">
+                  at {bestDeal.marketplace}
                 </div>
               </div>
             ) : (
-              <span className="text-xl font-bold text-emerald-400">
+              <span className="text-xl font-bold text-white">
                 ${product.price.toLocaleString()}
               </span>
             )}
           </div>
-          
-          <div className="flex items-center gap-1 text-slate-400 group-hover:text-slate-300 transition-colors">
+
+          <div className="flex items-center gap-1 text-slate-400">
             <Users className="w-4 h-4" />
             <span className="text-sm">{product.reviews.toLocaleString()}</span>
           </div>
         </div>
 
-        {/* Tags */}
-        <div className="flex flex-wrap gap-1 mb-4">
+        <div className="flex flex-wrap gap-1.5 mb-4">
           {product.tags.slice(0, 3).map((tag) => (
             <span
               key={tag}
-              className="px-2 py-1 bg-slate-700/50 text-slate-300 rounded-full text-xs border border-slate-600/30 group-hover:border-emerald-500/30 transition-colors"
+              className="px-2 py-0.5 bg-white/10 text-slate-300 rounded text-xs"
             >
               {tag}
             </span>
           ))}
         </div>
 
-        {/* Purchase Options */}
         <div className="space-y-2">
           {bestDeal ? (
             <button
               onClick={() => handlePurchaseClick(bestDeal.marketplace, product.marketplaceLinks[bestDeal.marketplace] || '')}
-              className="w-full py-3 px-4 rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:scale-105 transform"
+              className="w-full py-2.5 px-4 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-semibold transition-colors flex items-center justify-center gap-2"
             >
               <ShoppingCart className="w-4 h-4" />
-              Best Price: ${bestDeal.price}
+              Buy for ${bestDeal.price}
             </button>
           ) : (
             <button
               onClick={() => handlePurchaseClick('amazon', product.marketplaceLinks.amazon || '')}
-              className="w-full py-3 px-4 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:scale-105 transform"
+              className="w-full py-2.5 px-4 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-semibold transition-colors flex items-center justify-center gap-2"
             >
               <ShoppingCart className="w-4 h-4" />
-              Buy Now - ${product.price.toLocaleString()}
+              Buy Now
             </button>
           )}
-          
-          {/* Secondary marketplace options */}
+
           <div className="grid grid-cols-2 gap-2">
             {Object.entries(product.marketplaceLinks)
               .filter(([marketplace]) => marketplace !== bestDeal?.marketplace)
@@ -131,18 +122,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, featured = false }) 
               <button
                 key={marketplace}
                 onClick={() => handlePurchaseClick(marketplace, url)}
-                className="py-2 px-3 rounded-lg bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 hover:text-white border border-slate-600/30 hover:border-emerald-500/50 transition-all duration-300 flex items-center justify-center gap-1 text-sm hover:scale-105 transform"
+                className="py-2 px-3 rounded bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 transition-colors flex items-center justify-center gap-1 text-xs"
               >
                 <ExternalLink className="w-3 h-3" />
                 {marketplace.charAt(0).toUpperCase() + marketplace.slice(1)}
               </button>
             ))}
-          </div>
-
-          <div className="text-center">
-            <p className="text-xs text-slate-500">
-              <span className="text-transparent bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text font-semibold">itsKiller</span> trusted partners • No extra cost to you
-            </p>
           </div>
         </div>
       </div>

@@ -196,18 +196,20 @@ const SubmissionForm: React.FC<SubmissionFormProps> = ({ onSubmit, onClose, hasS
   if (hasSubmitted) {
     return (
       <div className="fixed inset-0 bg-black/75 flex items-center justify-center p-4 z-50">
-        <div className="bg-slate-800 rounded-2xl p-8 w-full max-w-md border border-emerald-500/30 text-center">
-          <div className="text-6xl mb-4">🎉</div>
-          <h2 className="text-2xl font-bold text-white mb-4">Already Submitted!</h2>
-          <p className="text-slate-300 mb-6">
-            You've already shared your trusted item with our community. 
-            We're reviewing it and will publish it soon!
+        <div className="bg-slate-800 rounded-lg p-8 w-full max-w-md border border-white/10 text-center">
+          <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-green-500/30">
+            <CheckCircle className="w-8 h-8 text-green-400" />
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-4">Already Submitted</h2>
+          <p className="text-slate-400 mb-6">
+            You've already shared your product with the community.
+            We're reviewing it and will publish it soon.
           </p>
           <button
             onClick={onClose}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-lg transition-colors"
+            className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
           >
-            Got it!
+            Got it
           </button>
         </div>
       </div>
@@ -216,7 +218,7 @@ const SubmissionForm: React.FC<SubmissionFormProps> = ({ onSubmit, onClose, hasS
 
   return (
     <div className="fixed inset-0 bg-black/75 flex items-center justify-center p-4 z-50">
-      <div className="bg-slate-800 rounded-2xl p-6 w-full max-w-4xl border border-emerald-500/30 relative max-h-[90vh] overflow-y-auto">
+      <div className="bg-slate-800 rounded-lg p-6 w-full max-w-4xl border border-white/10 relative max-h-[90vh] overflow-y-auto">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors z-10"
@@ -224,26 +226,24 @@ const SubmissionForm: React.FC<SubmissionFormProps> = ({ onSubmit, onClose, hasS
           <X className="w-6 h-6" />
         </button>
 
-        {/* Header */}
         <div className="flex items-center gap-3 mb-6">
-          <div className="bg-gradient-to-r from-emerald-500 to-teal-500 p-3 rounded-full">
+          <div className="bg-orange-500 p-3 rounded-lg">
             <Star className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-white">Add Your Killer Item</h2>
-            <p className="text-slate-400">Share your favorite product with smart price comparison</p>
+            <h2 className="text-2xl font-bold text-white">Share Your Product</h2>
+            <p className="text-slate-400">Tell us about your favorite product</p>
           </div>
         </div>
 
-        {/* Progress Bar */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-slate-400">Step {currentStep} of {totalSteps}</span>
-            <span className="text-sm text-emerald-400">{Math.round((currentStep / totalSteps) * 100)}% Complete</span>
+            <span className="text-sm text-white">{Math.round((currentStep / totalSteps) * 100)}%</span>
           </div>
           <div className="w-full bg-slate-700 rounded-full h-2">
-            <div 
-              className="bg-gradient-to-r from-emerald-500 to-teal-500 h-2 rounded-full transition-all duration-300"
+            <div
+              className="bg-orange-500 h-2 rounded-full transition-all"
               style={{ width: `${(currentStep / totalSteps) * 100}%` }}
             ></div>
           </div>
@@ -254,9 +254,8 @@ const SubmissionForm: React.FC<SubmissionFormProps> = ({ onSubmit, onClose, hasS
           {currentStep === 1 && (
             <div className="space-y-6">
               <div className="text-center mb-6">
-                <div className="text-4xl mb-2">🎯</div>
-                <h3 className="text-xl font-bold text-white">Tell us about your killer item</h3>
-                <p className="text-slate-400">What's the product you can't live without?</p>
+                <h3 className="text-xl font-bold text-white">Product Details</h3>
+                <p className="text-slate-400">Tell us about the product you recommend</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -349,9 +348,8 @@ const SubmissionForm: React.FC<SubmissionFormProps> = ({ onSubmit, onClose, hasS
           {currentStep === 2 && (
             <div className="space-y-6">
               <div className="text-center mb-6">
-                <div className="text-4xl mb-2">💭</div>
-                <h3 className="text-xl font-bold text-white">Share your personal experience</h3>
-                <p className="text-slate-400">This is what makes your recommendation valuable</p>
+                <h3 className="text-xl font-bold text-white">Your Experience</h3>
+                <p className="text-slate-400">Share your personal experience with this product</p>
               </div>
 
               <div>
@@ -406,9 +404,8 @@ const SubmissionForm: React.FC<SubmissionFormProps> = ({ onSubmit, onClose, hasS
           {currentStep === 3 && (
             <div className="space-y-6">
               <div className="text-center mb-6">
-                <div className="text-4xl mb-2">🔍</div>
-                <h3 className="text-xl font-bold text-white">Find Best Prices & Add Affiliate Links</h3>
-                <p className="text-slate-400">We'll search all major retailers and add affiliate links automatically</p>
+                <h3 className="text-xl font-bold text-white">Find Best Prices</h3>
+                <p className="text-slate-400">Search major retailers for the best deals</p>
               </div>
 
               {/* Search Interface */}
@@ -428,7 +425,7 @@ const SubmissionForm: React.FC<SubmissionFormProps> = ({ onSubmit, onClose, hasS
                     type="button"
                     onClick={handleProductSearch}
                     disabled={isSearching || !formData.name}
-                    className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2"
+                    className="bg-orange-500 hover:bg-orange-600 disabled:bg-slate-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2"
                   >
                     {isSearching ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -459,9 +456,9 @@ const SubmissionForm: React.FC<SubmissionFormProps> = ({ onSubmit, onClose, hasS
                               <button
                                 type="button"
                                 onClick={() => selectSearchResult(result)}
-                                className="mt-2 text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded transition-colors"
+                                className="mt-2 text-xs bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded transition-colors"
                               >
-                                Add with Affiliate Link
+                                Add Link
                               </button>
                             </div>
                           </div>
@@ -474,13 +471,13 @@ const SubmissionForm: React.FC<SubmissionFormProps> = ({ onSubmit, onClose, hasS
                 {/* Selected Results */}
                 {selectedResults.length > 0 && (
                   <div className="mt-6 space-y-3">
-                    <h4 className="text-sm font-semibold text-emerald-400">Selected with Affiliate Links:</h4>
+                    <h4 className="text-sm font-semibold text-white">Selected Links:</h4>
                     {selectedResults.map((result, index) => (
-                      <div key={index} className="bg-emerald-500/10 rounded-lg p-3 border border-emerald-500/30 flex items-center justify-between">
+                      <div key={index} className="bg-white/5 rounded-lg p-3 border border-white/10 flex items-center justify-between">
                         <div>
                           <div className="text-sm font-medium text-white">{result.marketplace}</div>
-                          <div className="text-emerald-400 font-bold">${result.price}</div>
-                          <div className="text-xs text-slate-400">✓ Affiliate link added</div>
+                          <div className="text-orange-400 font-bold">${result.price}</div>
+                          <div className="text-xs text-slate-400">Link added</div>
                         </div>
                         <button
                           type="button"
@@ -501,9 +498,8 @@ const SubmissionForm: React.FC<SubmissionFormProps> = ({ onSubmit, onClose, hasS
           {currentStep === 4 && (
             <div className="space-y-6">
               <div className="text-center mb-6">
-                <div className="text-4xl mb-2">📋</div>
-                <h3 className="text-xl font-bold text-white">Review Your Submission</h3>
-                <p className="text-slate-400">Make sure everything looks good before submitting</p>
+                <h3 className="text-xl font-bold text-white">Review & Submit</h3>
+                <p className="text-slate-400">Check your information before submitting</p>
               </div>
 
               <div className="bg-slate-700/30 rounded-xl p-6 border border-slate-600/50 space-y-4">
@@ -522,24 +518,23 @@ const SubmissionForm: React.FC<SubmissionFormProps> = ({ onSubmit, onClose, hasS
                     <h4 className="text-sm font-semibold text-slate-300 mb-2">Affiliate Links ({selectedResults.length})</h4>
                     <div className="grid grid-cols-2 gap-2">
                       {selectedResults.map((result, index) => (
-                        <div key={index} className="bg-emerald-500/10 rounded px-3 py-2 border border-emerald-500/20">
-                          <div className="text-xs text-emerald-400">{result.marketplace} - ${result.price}</div>
+                        <div key={index} className="bg-white/5 rounded px-3 py-2 border border-white/10">
+                          <div className="text-xs text-white">{result.marketplace} - ${result.price}</div>
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
 
-                <div className="bg-emerald-500/10 rounded-lg p-4 border border-emerald-500/20">
+                <div className="bg-white/5 rounded-lg p-4 border border-white/10">
                   <div className="flex items-center gap-2 mb-2">
-                    <CheckCircle className="w-4 h-4 text-emerald-400" />
-                    <span className="text-sm font-semibold text-emerald-400">Ready to Submit</span>
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                    <span className="text-sm font-semibold text-white">Ready to Submit</span>
                   </div>
                   <ul className="text-xs text-slate-400 space-y-1">
-                    <li>• Affiliate links will be automatically processed</li>
                     <li>• Your submission will be reviewed by our team</li>
-                    <li>• Once approved, it will appear in our community section</li>
-                    <li>• You'll earn from qualifying purchases at no extra cost to buyers</li>
+                    <li>• Once approved, it will appear in the community section</li>
+                    <li>• Links will be automatically processed</li>
                   </ul>
                 </div>
               </div>
@@ -570,17 +565,16 @@ const SubmissionForm: React.FC<SubmissionFormProps> = ({ onSubmit, onClose, hasS
                 <button
                   type="button"
                   onClick={nextStep}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors"
+                  className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-8 py-3 rounded-lg transition-colors"
                 >
                   Next Step
                 </button>
               ) : (
                 <button
                   type="submit"
-                  className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold px-8 py-3 rounded-lg transition-all duration-300 shadow-lg flex items-center gap-2"
+                  className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-8 py-3 rounded-lg transition-colors"
                 >
-                  <Award className="w-4 h-4" />
-                  Submit Killer Item
+                  Submit Product
                 </button>
               )}
             </div>

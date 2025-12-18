@@ -1,11 +1,11 @@
 import React from 'react';
-import { Search, Star, TrendingUp, Zap, Target } from 'lucide-react';
+import { Target, Users, Shield, TrendingDown } from 'lucide-react';
 
 const Header: React.FC = () => {
   return (
     <header className="space-y-12">
-      <div className="max-w-5xl mx-auto">
-        <div className="flex items-center justify-center gap-4 mb-6">
+      <div className="max-w-6xl mx-auto">
+        <div className="flex items-center justify-center gap-4 mb-8">
           <div className="bg-orange-500 p-4 rounded-lg">
             <Target className="w-10 h-10 text-white" />
           </div>
@@ -14,43 +14,59 @@ const Header: React.FC = () => {
           </h1>
         </div>
 
-        <p className="text-xl text-slate-400 text-center max-w-2xl mx-auto">
-          Compare prices across major retailers and find the best deals on top-rated products
-        </p>
-      </div>
-
-      <div className="bg-white/5 border border-white/10 rounded-xl p-8 max-w-5xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="text-center">
-            <div className="bg-blue-500/10 w-16 h-16 rounded-lg flex items-center justify-center mx-auto mb-3 border border-blue-500/20">
-              <Search className="w-8 h-8 text-blue-400" />
+        <div className="bg-gradient-to-br from-red-500/10 to-orange-500/10 border border-red-500/20 rounded-2xl p-10 mb-8">
+          <div className="text-center space-y-6">
+            <div className="inline-block bg-red-500/20 border border-red-500/30 rounded-full px-6 py-2">
+              <p className="text-red-300 font-bold text-lg">THE PROBLEM</p>
             </div>
-            <h3 className="text-sm font-semibold text-white mb-1">Multi-Store Search</h3>
-            <p className="text-xs text-slate-400">Amazon, eBay, Walmart & more</p>
+
+            <h2 className="text-5xl md:text-6xl font-bold text-white">
+              $1 Trillion
+            </h2>
+
+            <p className="text-2xl md:text-3xl text-slate-300 font-semibold max-w-4xl mx-auto leading-relaxed">
+              Over the last few years, Americans have returned <span className="text-orange-400">$1 trillion dollars</span> worth of merchandise from online retailers.
+            </p>
+
+            <p className="text-xl text-red-300 font-bold">
+              This is unacceptable and unsustainable.
+            </p>
           </div>
+        </div>
 
-          <div className="text-center">
-            <div className="bg-green-500/10 w-16 h-16 rounded-lg flex items-center justify-center mx-auto mb-3 border border-green-500/20">
-              <Star className="w-8 h-8 text-green-400" />
+        <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/20 rounded-2xl p-10">
+          <div className="text-center space-y-6">
+            <div className="inline-block bg-green-500/20 border border-green-500/30 rounded-full px-6 py-2">
+              <p className="text-green-300 font-bold text-lg">THE SOLUTION</p>
             </div>
-            <h3 className="text-sm font-semibold text-white mb-1">Quality Verified</h3>
-            <p className="text-xs text-slate-400">Only top-rated products</p>
-          </div>
 
-          <div className="text-center">
-            <div className="bg-orange-500/10 w-16 h-16 rounded-lg flex items-center justify-center mx-auto mb-3 border border-orange-500/20">
-              <TrendingUp className="w-8 h-8 text-orange-400" />
-            </div>
-            <h3 className="text-sm font-semibold text-white mb-1">Best Prices</h3>
-            <p className="text-xs text-slate-400">Real-time price comparison</p>
-          </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-white max-w-3xl mx-auto leading-tight">
+              Buy Right the First Time
+            </h2>
 
-          <div className="text-center">
-            <div className="bg-yellow-500/10 w-16 h-16 rounded-lg flex items-center justify-center mx-auto mb-3 border border-yellow-500/20">
-              <Zap className="w-8 h-8 text-yellow-400" />
+            <p className="text-xl text-slate-300 max-w-4xl mx-auto leading-relaxed">
+              itsKiller changes this by directing you to the <span className="text-green-400 font-semibold">highest rated products</span> using <span className="text-orange-400 font-semibold">peer-to-peer referrals</span> and our <span className="text-blue-400 font-semibold">deep research-driven model</span>.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6">
+              <div className="bg-white/5 border border-white/10 rounded-xl p-6">
+                <Users className="w-12 h-12 text-orange-400 mx-auto mb-4" />
+                <h3 className="text-lg font-bold text-white mb-2">Peer Referrals</h3>
+                <p className="text-sm text-slate-400">Real users sharing products they actually own and love</p>
+              </div>
+
+              <div className="bg-white/5 border border-white/10 rounded-xl p-6">
+                <Shield className="w-12 h-12 text-green-400 mx-auto mb-4" />
+                <h3 className="text-lg font-bold text-white mb-2">Deep Research</h3>
+                <p className="text-sm text-slate-400">Data-driven analysis to find truly quality products</p>
+              </div>
+
+              <div className="bg-white/5 border border-white/10 rounded-xl p-6">
+                <TrendingDown className="w-12 h-12 text-blue-400 mx-auto mb-4" />
+                <h3 className="text-lg font-bold text-white mb-2">Reduce Returns</h3>
+                <p className="text-sm text-slate-400">Help make online shopping sustainable again</p>
+              </div>
             </div>
-            <h3 className="text-sm font-semibold text-white mb-1">Instant Results</h3>
-            <p className="text-xs text-slate-400">Fast search across platforms</p>
           </div>
         </div>
       </div>

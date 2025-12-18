@@ -121,14 +121,14 @@ function AppContent() {
             </div>
           ) : (
             <div className="space-y-8">
-              <div className="bg-white/5 border border-white/10 rounded-xl p-8 max-w-4xl mx-auto">
+              <div className="bg-white/5 border border-white/10 rounded-xl p-8 max-w-3xl mx-auto">
                 <div className="text-center space-y-6">
                   <h2 className="text-3xl font-bold text-white">
-                    Share Your Favorite Product
+                    Recommend a Product
                   </h2>
 
-                  <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-                    Recommend one product you personally use and love. Help others discover great items.
+                  <p className="text-lg text-slate-400 max-w-xl mx-auto">
+                    Share your favorite product with the community. Quick and easy!
                   </p>
 
                   {hasSubmitted ? (
@@ -138,33 +138,16 @@ function AppContent() {
                       </div>
                       <h3 className="text-2xl font-bold text-white">Thank You!</h3>
                       <p className="text-slate-400">
-                        Your submission is under review. We'll publish it after verification.
+                        Your recommendation is under review and will appear soon.
                       </p>
                     </div>
                   ) : (
-                    <div className="space-y-6">
-                      <button
-                        onClick={() => setShowSubmission(true)}
-                        className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-8 py-4 rounded-lg transition-colors"
-                      >
-                        Submit Your Product
-                      </button>
-
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
-                        <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                          <h4 className="font-semibold text-white mb-2">Personal Experience</h4>
-                          <p className="text-sm text-slate-400">Only share products you personally own and use</p>
-                        </div>
-                        <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                          <h4 className="font-semibold text-white mb-2">Honest Review</h4>
-                          <p className="text-sm text-slate-400">Share your genuine experience with the product</p>
-                        </div>
-                        <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                          <h4 className="font-semibold text-white mb-2">One Per Person</h4>
-                          <p className="text-sm text-slate-400">Choose your absolute favorite product</p>
-                        </div>
-                      </div>
-                    </div>
+                    <button
+                      onClick={() => setShowSubmission(true)}
+                      className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-10 py-4 rounded-lg transition-colors text-lg"
+                    >
+                      Share Your Recommendation
+                    </button>
                   )}
                 </div>
               </div>

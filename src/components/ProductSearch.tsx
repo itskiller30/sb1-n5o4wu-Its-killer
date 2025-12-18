@@ -22,7 +22,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
     query: '',
     category: '',
     priceRange: [0, 1000],
-    rating: 4,
+    rating: 4.0,
     marketplace: '',
     sortBy: 'rating'
   });
@@ -67,15 +67,14 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
     try {
       const results = await searchProducts(filters.query);
       
-      // Apply filters to results
       let filteredResults = results.filter(result => {
-        const matchesCategory = !filters.category || filters.category === 'All Categories' || 
+        const matchesCategory = !filters.category || filters.category === 'All Categories' ||
           result.category?.toLowerCase().includes(filters.category.toLowerCase());
         const matchesPrice = result.price >= filters.priceRange[0] && result.price <= filters.priceRange[1];
-        const matchesRating = !filters.rating || !result.rating || result.rating >= filters.rating;
-        const matchesMarketplace = !filters.marketplace || filters.marketplace === 'All Stores' || 
+        const matchesRating = !result.rating || result.rating >= 4.0;
+        const matchesMarketplace = !filters.marketplace || filters.marketplace === 'All Stores' ||
           result.marketplace === filters.marketplace;
-        
+
         return matchesCategory && matchesPrice && matchesRating && matchesMarketplace;
       });
 
@@ -158,19 +157,19 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
   };
 
   return (
-    <div className="bg-gradient-to-br from-slate-800/60 via-slate-700/40 to-slate-800/60 backdrop-blur-sm rounded-2xl p-8 border border-blue-500/30 shadow-2xl">
+    <div className="bg-gradient-to-br from-slate-800/60 via-slate-700/40 to-slate-800/60 backdrop-blur-sm rounded-2xl p-8 border border-orange-500/30 shadow-2xl">
       <div className="space-y-8">
         {/* Search Header */}
         <div className="text-center space-y-4">
           <div className="flex items-center justify-center gap-3">
-            <Zap className="w-8 h-8 text-blue-400 animate-pulse" />
+            <Star className="w-8 h-8 text-yellow-400" />
             <h2 className="text-3xl font-bold text-white">
-              Search <span className="text-transparent bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text">itsKiller</span> Products
+              Search <span className="text-transparent bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text">Top-Rated</span> Products
             </h2>
-            <Star className="w-8 h-8 text-yellow-400 animate-twinkle" />
+            <Star className="w-8 h-8 text-yellow-400" />
           </div>
           <p className="text-slate-300 text-lg">
-            Find the highest-rated products across all major retailers in seconds
+            Only products with 4+ star ratings from trusted retailers
           </p>
         </div>
 
@@ -183,9 +182,9 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
               onChange={(e) => handleInputChange(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
               placeholder="Search for products (e.g., wireless headphones, coffee maker, laptop)..."
-              className="w-full bg-slate-700/50 border border-slate-600 rounded-xl px-6 py-5 pl-16 pr-36 text-white text-xl placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all shadow-lg"
+              className="w-full bg-slate-700/50 border border-slate-600 rounded-xl px-6 py-5 pl-16 pr-36 text-white text-xl placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all shadow-lg"
             />
-            <Search className="absolute left-6 top-6 w-7 h-7 text-blue-400" />
+            <Search className="absolute left-6 top-6 w-7 h-7 text-orange-400" />
             
             <div className="absolute right-3 top-2.5 flex gap-2">
               {filters.query && (
@@ -200,7 +199,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
               <button
                 onClick={handleSearch}
                 disabled={isSearching || !filters.query.trim()}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-slate-600 disabled:to-slate-600 disabled:cursor-not-allowed text-white px-8 py-3 rounded-lg font-bold transition-all duration-300 flex items-center gap-2 shadow-lg hover:scale-105 transform"
+                className="bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 disabled:from-slate-600 disabled:to-slate-600 disabled:cursor-not-allowed text-white px-8 py-3 rounded-lg font-bold transition-all duration-300 flex items-center gap-2 shadow-lg"
               >
                 {isSearching ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
@@ -222,7 +221,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
                   className="w-full text-left px-6 py-4 hover:bg-slate-700 text-white first:rounded-t-xl last:rounded-b-xl transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <TrendingUp className="w-5 h-5 text-blue-400" />
+                    <TrendingUp className="w-5 h-5 text-orange-400" />
                     <span className="font-medium text-lg">{suggestion}</span>
                   </div>
                 </button>
@@ -236,9 +235,9 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
           <button
             onClick={() => setShowAdvanced(!showAdvanced)}
             className={`flex items-center gap-2 px-6 py-3 rounded-lg border transition-all duration-300 ${
-              showAdvanced 
-                ? 'bg-blue-600 text-white border-blue-600 shadow-lg' 
-                : 'bg-slate-700 text-slate-300 border-slate-600 hover:border-blue-500 hover:text-white hover:bg-slate-600'
+              showAdvanced
+                ? 'bg-orange-600 text-white border-orange-600 shadow-lg'
+                : 'bg-slate-700 text-slate-300 border-slate-600 hover:border-orange-500 hover:text-white hover:bg-slate-600'
             }`}
           >
             <Filter className="w-5 h-5" />
@@ -248,7 +247,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
           <select
             value={filters.sortBy}
             onChange={(e) => setFilters(prev => ({ ...prev, sortBy: e.target.value as any }))}
-            className="px-6 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500 text-lg"
+            className="px-6 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-orange-500 text-lg"
           >
             <option value="rating">Highest Rated First</option>
             <option value="price_low">Price: Low to High</option>
@@ -259,7 +258,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
           <select
             value={filters.marketplace}
             onChange={(e) => setFilters(prev => ({ ...prev, marketplace: e.target.value }))}
-            className="px-6 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500 text-lg"
+            className="px-6 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-orange-500 text-lg"
           >
             {marketplaces.map(marketplace => (
               <option key={marketplace} value={marketplace === 'All Stores' ? '' : marketplace}>
@@ -278,7 +277,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
                 <select
                   value={filters.category}
                   onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value }))}
-                  className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500 text-lg"
+                  className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-orange-500 text-lg"
                 >
                   {categories.map(category => (
                     <option key={category} value={category === 'All Categories' ? '' : category}>
@@ -296,21 +295,21 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
                   <input
                     type="number"
                     value={filters.priceRange[0]}
-                    onChange={(e) => setFilters(prev => ({ 
-                      ...prev, 
-                      priceRange: [Number(e.target.value), prev.priceRange[1]] 
+                    onChange={(e) => setFilters(prev => ({
+                      ...prev,
+                      priceRange: [Number(e.target.value), prev.priceRange[1]]
                     }))}
-                    className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500 text-lg"
+                    className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-orange-500 text-lg"
                     placeholder="Min"
                   />
                   <input
                     type="number"
                     value={filters.priceRange[1]}
-                    onChange={(e) => setFilters(prev => ({ 
-                      ...prev, 
-                      priceRange: [prev.priceRange[0], Number(e.target.value)] 
+                    onChange={(e) => setFilters(prev => ({
+                      ...prev,
+                      priceRange: [prev.priceRange[0], Number(e.target.value)]
                     }))}
-                    className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500 text-lg"
+                    className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-orange-500 text-lg"
                     placeholder="Max"
                   />
                 </div>
@@ -318,20 +317,12 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
 
               <div>
                 <label className="block text-slate-300 text-lg mb-3 font-medium">
-                  Minimum Rating: {filters.rating}/5 ⭐
+                  Minimum Rating: 4.0/5 ⭐ (Fixed)
                 </label>
-                <input
-                  type="range"
-                  min="0"
-                  max="5"
-                  step="0.5"
-                  value={filters.rating}
-                  onChange={(e) => setFilters(prev => ({ ...prev, rating: Number(e.target.value) }))}
-                  className="w-full h-3 bg-slate-600 rounded-lg appearance-none cursor-pointer slider"
-                />
-                <div className="flex justify-between text-sm text-slate-400 mt-2">
-                  <span>Any</span>
-                  <span>Excellent</span>
+                <div className="bg-orange-500/20 border border-orange-500/30 rounded-lg px-4 py-3 text-center">
+                  <p className="text-orange-300 text-sm font-medium">
+                    All results are automatically filtered to show only high-quality products with 4+ star ratings
+                  </p>
                 </div>
               </div>
             </div>
@@ -346,7 +337,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
               <button
                 key={index}
                 onClick={() => selectSuggestion(search)}
-                className="px-4 py-2 bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 hover:text-white rounded-full text-sm border border-slate-600/50 hover:border-blue-500/50 transition-all hover:scale-105 transform"
+                className="px-4 py-2 bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 hover:text-white rounded-full text-sm border border-slate-600/50 hover:border-orange-500/50 transition-all"
               >
                 {search}
               </button>
@@ -357,12 +348,12 @@ const ProductSearch: React.FC<ProductSearchProps> = ({ onResults, onFiltersChang
         {/* Search Status */}
         {isSearching && (
           <div className="flex items-center justify-center py-6">
-            <div className="bg-blue-500/20 rounded-full p-4 border border-blue-400/30">
-              <Loader2 className="w-8 h-8 animate-spin text-blue-400" />
+            <div className="bg-orange-500/20 rounded-full p-4 border border-orange-400/30">
+              <Loader2 className="w-8 h-8 animate-spin text-orange-400" />
             </div>
             <div className="ml-4">
-              <div className="text-blue-400 font-bold text-lg">Searching all platforms...</div>
-              <div className="text-slate-400">Finding the best deals and highest ratings</div>
+              <div className="text-orange-400 font-bold text-lg">Searching for top-rated products...</div>
+              <div className="text-slate-400">Finding the best deals with 4+ star ratings</div>
             </div>
           </div>
         )}
